@@ -2,6 +2,7 @@
 var canvas_main;
 var canvas_main_cxt;
 var game = 0;
+var gameloop;
 
 //load images
 var allimages = ['player.png','enemy1.png','enemy2.png','enemy3.png','explosion.png'];
@@ -145,7 +146,7 @@ function objectobj(mysprite, widthactor, heightactor, posx, posy){
         switch(this.actiontype){
             case 0:
                 theplayer.ypos += 100;
-                theplayer.xpos = getRandomArbitrary(10, canvas_main.width - 10);
+                theplayer.xpos = getRandomArbitrary(10, canvas_main.width - 30);
                 break;
             case 1:
                 break;
@@ -348,7 +349,7 @@ var lenny = {
                         enemies.splice(i, 1);
                     }
                 }
-                setTimeout(lenny.game.gameLoop,10);
+                gameloop = setTimeout(lenny.game.gameLoop,10);
             }
             else {
                 canvas_main_cxt.fillText("GAME OVER", canvas_main.width / 2, canvas_main.height - 60);
@@ -379,6 +380,8 @@ window.onload = function(){
             player.launch();
         }
         else {
+            game = 0;
+            clearTimeout(gameloop);
             lenny.general.initGame();
             lenny.game.gameLoop();
         }
