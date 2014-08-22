@@ -6,7 +6,7 @@ var gameloop;
 
 //load images
 var allimages = ['player.png','enemy1.png','enemy2.png','enemy3.png','explosion.png'];
-var objectimages = ['object1.png','object2.png'];
+var objectimages = ['object1.png','object2.png','object3.png'];
 
 allimages = preloadImages(allimages);
 objectimages = preloadImages(objectimages);
@@ -35,6 +35,9 @@ function getRandomArbitrary(min, max) {
 //general object for main character
 function characterobj(mysprite, widthactor, heightactor, posx, posy){
     this.sprite = mysprite;
+    this.spritex = 0;
+    this.spritey = 0;
+    this.spritewidth = 20;
     this.actorwidth = widthactor;
     this.actorheight = heightactor;
     this.xpos = posx;
@@ -63,6 +66,9 @@ function characterobj(mysprite, widthactor, heightactor, posx, posy){
 //general object for enemy
 function enemyobj(mysprite, widthactor, heightactor, posx, posy){
     this.sprite = mysprite;
+    this.spritex = 0;
+    this.spritey = 0;
+    this.spritewidth = 20;
     this.actorwidth = widthactor;
     this.actorheight = heightactor;
     this.xpos = posx;
@@ -110,6 +116,7 @@ function enemyobj(mysprite, widthactor, heightactor, posx, posy){
             if(toplefty >= theplayer.ypos && toplefty <= (theplayer.ypos + theplayer.actorheight) || botlefty >= theplayer.ypos && botlefty <= (theplayer.ypos + theplayer.actorwidth)){
                 if(topleftx >= theplayer.xpos && topleftx <= (theplayer.xpos + theplayer.actorwidth) || toprightx >= theplayer.xpos && toprightx <= (theplayer.xpos + theplayer.actorwidth)){
                     theplayer.points += this.points;
+                    theplayer.ypos += 10;
                     this.moveby = 0;
                 }
             }
@@ -128,6 +135,9 @@ function enemyobj(mysprite, widthactor, heightactor, posx, posy){
 //general object for object
 function objectobj(mysprite, widthactor, heightactor, posx, posy){
     this.sprite = mysprite;
+    this.spritex = 0;
+    this.spritey = 0;
+    this.spritewidth = 20;
     this.actorwidth = widthactor;
     this.actorheight = heightactor;
     this.xpos = posx;
@@ -149,6 +159,12 @@ function objectobj(mysprite, widthactor, heightactor, posx, posy){
                 theplayer.xpos = getRandomArbitrary(10, canvas_main.width - 30);
                 break;
             case 1:
+                break;
+            case 2:
+                theplayer.actorwidth = Math.min(theplayer.actorwidth + 30, 90); //3x party companions
+                theplayer.spritewidth = Math.min(theplayer.spritewidth + 20, 60);
+                if(theplayer.spritewidth < 60) //just doing this roughly to begin with, need better non-hardcoded mechanism
+                    theplayer.xpos -= theplayer.actorwidth / 2;
                 break;
         }
     }
@@ -221,8 +237,7 @@ var lenny = {
         },
         //draw some object on the canvas
         drawCanvas: function(object, cxt){
-            //cxt.drawImage(object.sprite, object.spritex, object.spritey, object.actorwidth, object.actorheight, object.xpos, object.ypos, object.actorwidth, object.actorheight);
-            cxt.drawImage(object.sprite, object.xpos, object.ypos, object.actorwidth, object.actorheight);
+            cxt.drawImage(object.sprite, object.spritex, object.spritey, object.spritewidth, 20, object.xpos, object.ypos, object.actorwidth, object.actorheight);
         },
         //completely clear the canvas
         clearCanvas: function(canvas, cxt){
@@ -280,7 +295,6 @@ var lenny = {
                 thisenemy = Math.floor(getRandomArbitrary(0,enemydata.length));
 
                 enemyx = getRandomArbitrary(0,canvas_main.width); //randomly position x
-                //enemyy = getRandomArbitrary(20,canvas_main.height - 100); //randomly position y, based on the limits for this enemy
                 enemyy = getRandomArbitrary(enemydata[thisenemy]['vertposmin'],enemydata[thisenemy]['vertposmax']);
                 enemyimage = enemydata[thisenemy]['img'];
 
@@ -311,6 +325,13 @@ var lenny = {
                     'vertposmin': 10,
                     'vertposmax': canvas_main.height - 120,
                     'action':1
+                },
+                {
+                    'type': 'party up',
+                    'img': objectimages[2],
+                    'vertposmin': 10,
+                    'vertposmax': canvas_main.height - 120,
+                    'action':2
                 }
             ]
 
@@ -335,7 +356,6 @@ var lenny = {
             //put code in here that needs to run for the game to work
             if(game){
                 lenny.general.clearCanvas(canvas_main,canvas_main_cxt);
-                player.runActions();
                 for(i = 0; i < objects.length; i++){
                     objects[i].runActions();
                     if(objects[i].checkCollision(player)){
@@ -349,6 +369,7 @@ var lenny = {
                         enemies.splice(i, 1);
                     }
                 }
+                player.runActions();
                 gameloop = setTimeout(lenny.game.gameLoop,10);
             }
             else {
