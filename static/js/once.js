@@ -4,7 +4,7 @@ var canvas_main_cxt;
 
 //load images
 var imagedir = 'static/img/';
-var allimages = ['player.png','enemy1.png'];
+var allimages = ['player.png','enemy1.png','enemy2.png','enemy3.png','explosion.png'];
 //preload all images
 var tempimg;
 for(i in allimages){
@@ -13,59 +13,131 @@ for(i in allimages){
     allimages[i] = tempimg;
 }
 
+objectimages = ['object1.png','object2.png'];
+
+for(i in allimages){
+    tempimg = new Image();
+    tempimg.src = imagedir + objectimages[i];
+    objectimages[i] = tempimg;
+}
 
 var player;
 var enemies = [];
+var objects = [];
 
 // Returns a random number between min (inclusive) and max (exclusive)
 function getRandomArbitrary(min, max) {
   return Math.random() * (max - min) + min;
 }
 
-//general object for a character
-function character(mysprite, xsprite, ysprite, widthactor, heightactor, posx, posy){
+//general object for main character
+function characterobj(mysprite, widthactor, heightactor, posx, posy){
     this.sprite = mysprite;
-    this.spritex = xsprite;
-    this.spritey = ysprite;
     this.actorwidth = widthactor;
     this.actorheight = heightactor;
     this.xpos = posx;
     this.ypos = posy;
-    //for the player
+    this.speed = 1;
+
     this.active = 0;
-    //for enemies
-    this.range = 0;
-    this.direction = 0;
-    this.startpos = 0;
-    this.moveby = 1;
 
     this.runActions = function(){
         if(this.active){
             if(this.ypos > 0){
-                this.ypos -= 1;
+                this.ypos -= this.speed;
             }
         }
         lenny.general.drawCanvas(this,canvas_main_cxt);
     };
-    //move character left or right
-    this.move = function(){
-        if(this.direction){
-            if(this.xpos > (this.startpos - (this.range / 2)))
-                this.xpos -= this.moveby;
-            else
-                this.direction = 0;
-        }
-        else {
-            if(this.xpos < (this.startpos + (this.range / 2)))
-                this.xpos += this.moveby;
-            else
-                this.direction = 1;
-        }
-    };
     this.launch = function(){
         this.active = 1;
     };
+}
+
+//general object for enemy
+function enemyobj(mysprite, widthactor, heightactor, posx, posy){
+    this.sprite = mysprite;
+    this.actorwidth = widthactor;
+    this.actorheight = heightactor;
+    this.xpos = posx;
+    this.ypos = posy;
+
+    this.range = 0;
+    this.direction = 0;
+    this.startpos = 0;
+    this.moveby = 0; //speed
+
+    this.runActions = function(){
+        lenny.general.drawCanvas(this,canvas_main_cxt);
+    };
+    //move character left or right
+    this.move = function(){
+        if(this.moveby){
+            if(this.direction){
+                if(this.xpos > (this.startpos - (this.range / 2)))
+                    this.xpos -= this.moveby;
+                else
+                    this.direction = 0;
+            }
+            else {
+                if(this.xpos < (this.startpos + (this.range / 2)))
+                    this.xpos += this.moveby;
+                else
+                    this.direction = 1;
+            }
+        }
+    };
     //check to see if this enemy has hit the player
+    this.checkCollision = function(theplayer){
+        if(this.moveby){
+            var topleftx = this.xpos;
+            var toplefty = this.ypos;
+            var toprightx = this.xpos + this.actorwidth;
+            var toprighty = this.ypos;
+            var botleftx = this.xpos;
+            var botlefty = this.ypos + this.actorheight;
+            var botrightx = this.xpos + this.actorwidth;
+            var botrighty = this.ypos + this.actorwidth;
+
+            if(toplefty >= theplayer.ypos && toplefty <= (theplayer.ypos + theplayer.actorheight) || botlefty >= theplayer.ypos && botlefty <= (theplayer.ypos + theplayer.actorwidth)){
+                if(topleftx >= theplayer.xpos && topleftx <= (theplayer.xpos + theplayer.actorwidth) || toprightx >= theplayer.xpos && toprightx <= (theplayer.xpos + theplayer.actorwidth)){
+                    //return(1);
+                    this.moveby = 0;
+                }
+            }
+        }
+        else {
+            this.expire();
+        }
+        return(0);
+    };
+    //perform death of this enemy
+    this.expire = function(){
+        this.sprite = allimages[4];
+    }
+}
+
+//general object for object
+function objectobj(mysprite, widthactor, heightactor, posx, posy){
+    this.sprite = mysprite;
+    this.actorwidth = widthactor;
+    this.actorheight = heightactor;
+    this.xpos = posx;
+    this.ypos = posy;
+
+    this.actiontype = 0;
+
+    this.runActions = function(){
+        lenny.general.drawCanvas(this,canvas_main_cxt);
+    };
+    //perform the action that happens when the player touches this object
+    this.performTrigger = function(theplayer){
+        if(this.actiontype == 0){
+            theplayer.ypos += 100;
+            theplayer.xpos = getRandomArbitrary(10, canvas_main.width - 10);
+        }
+    }
+    //check to see if this object has hit the player
     this.checkCollision = function(theplayer){
         var topleftx = this.xpos;
         var toplefty = this.ypos;
@@ -77,7 +149,8 @@ function character(mysprite, xsprite, ysprite, widthactor, heightactor, posx, po
         var botrighty = this.ypos + this.actorwidth;
 
         if(toplefty >= theplayer.ypos && toplefty <= (theplayer.ypos + theplayer.actorheight) || botlefty >= theplayer.ypos && botlefty <= (theplayer.ypos + theplayer.actorwidth)){
-            if(topleftx >= theplayer.xpos && topleftx <= (theplayer.xpos + theplayer.actorwidth) || botrightx + this.actorwidth >= theplayer.xpos && toprightx <= (theplayer.xpos + theplayer.actorwidth)){
+            if(topleftx >= theplayer.xpos && topleftx <= (theplayer.xpos + theplayer.actorwidth) || toprightx >= theplayer.xpos && toprightx <= (theplayer.xpos + theplayer.actorwidth)){
+                this.performTrigger(theplayer);
                 return(1);
             }
         }
@@ -91,12 +164,12 @@ var lenny = {
     general: {
         //set up function, starts it off
         initialise: function(){
-            console.log('init');
             canvas_main = document.getElementById('canvas_main');
             canvas_main_cxt = lenny.general.initCanvas(canvas_main,canvas_main_cxt);
             
             lenny.people.setupPlayer();
             lenny.people.setupEnemies();
+            lenny.people.setupObjects();
 
             lenny.game.gameLoop();
         },
@@ -112,7 +185,8 @@ var lenny = {
         },
         //draw some object on the canvas
         drawCanvas: function(object, cxt){
-            cxt.drawImage(object.sprite, object.spritex, object.spritey, object.actorwidth, object.actorheight, object.xpos, object.ypos, object.actorwidth, object.actorheight);
+            //cxt.drawImage(object.sprite, object.spritex, object.spritey, object.actorwidth, object.actorheight, object.xpos, object.ypos, object.actorwidth, object.actorheight);
+            cxt.drawImage(object.sprite, object.xpos, object.ypos, object.actorwidth, object.actorheight);
         },
         //completely clear the canvas
         clearCanvas: function(canvas, cxt){
@@ -125,36 +199,94 @@ var lenny = {
     people: {
         setupPlayer: function(){
             var playerimage = allimages[0];
-            var playerimagex = 0;
-            var playerimagey = 0;
-            var playerwidth = 20;
-            var playerheight = 20;
+            var playerwidth = 30;
+            var playerheight = 30;
             var playerx = (canvas_main.width / 2) - (playerwidth / 2);
             var playery = canvas_main.height - playerheight;
 
-            player = new character(playerimage, playerimagex, playerimagey, playerwidth, playerheight, playerx, playery);
+            player = new characterobj(playerimage, playerwidth, playerheight, playerx, playery);
         },
         setupEnemies: function(){
-            var enemyimage = allimages[1];
-            var enemyimagex = 0;
-            var enemyimagey = 0;
-            var enemywidth = 20;
-            var enemyheight = 20;
-            var enemyx = 0;
-            var enemyy = 0;
+            var enemywidth = 30;
+            var enemyheight = 30;
 
-            var enemycount = 100;
+            var enemydata = [
+                {
+                    'type': 'level 1',
+                    'img': allimages[1],
+                    'speed': 0.5,
+                    'vertposmin': 200,
+                    'vertposmax': canvas_main.height - 100
+                },
+                {
+                    'type': 'level 2',
+                    'img': allimages[2],
+                    'speed': 1,
+                    'vertposmin': 120,
+                    'vertposmax': canvas_main.height - 150
+                },
+                {
+                    'type': 'level 3',
+                    'img': allimages[3],
+                    'speed': 0.2,
+                    'vertposmin': 60,
+                    'vertposmax': canvas_main.height - 300
+                }
+            ];
+
+            var enemycount = 50;
             var enemytmp;
 
             for(i = 0; i < enemycount; i++){
+                thisenemy = Math.floor(getRandomArbitrary(0,enemydata.length));
+
                 enemyx = getRandomArbitrary(0,canvas_main.width); //randomly position x
-                enemyy = getRandomArbitrary(20,canvas_main.height - 100); //randomly position y, but not right at the bottom or top
-                enemytmp = new character(enemyimage, enemyimagex, enemyimagey, enemywidth, enemyheight, enemyx, enemyy);
-                enemytmp.range = getRandomArbitrary(50,250);
+                //enemyy = getRandomArbitrary(20,canvas_main.height - 100); //randomly position y, based on the limits for this enemy
+                enemyy = getRandomArbitrary(enemydata[thisenemy]['vertposmin'],enemydata[thisenemy]['vertposmax']);
+                enemyimage = enemydata[thisenemy]['img'];
+
+                enemytmp = new enemyobj(enemyimage, enemywidth, enemyheight, enemyx, enemyy);
+                enemytmp.range = getRandomArbitrary(50,canvas_main.width / 4); //distance the enemy will move
                 enemytmp.direction = getRandomArbitrary(0,1);
                 enemytmp.startpos = enemyx;
-                enemytmp.moveby = Math.random(); //getRandomArbitrary(1,2);
+                enemytmp.moveby = enemydata[thisenemy]['speed']
                 enemies.push(enemytmp);
+            }
+        },
+        setupObjects: function(){
+            var objwidth = 30;
+            var objheight = 30;
+
+            var objdata = [
+                {
+                    'type': 'teleport',
+                    'img': objectimages[0],
+                    'vertposmin': 10,
+                    'vertposmax': canvas_main.height - 120,
+                    'action':0
+                },
+                {
+                    'type': 'level up',
+                    'img': objectimages[1],
+                    'vertposmin': 10,
+                    'vertposmax': canvas_main.height - 120,
+                    'action':1
+                }
+            ]
+
+            var objcount = 5;
+            var objtmp;
+
+            for(i = 0; i < objcount; i++){
+                thisobj = Math.floor(getRandomArbitrary(0,objdata.length));
+
+                objx = getRandomArbitrary(0,canvas_main.width); //randomly position x
+                objy = getRandomArbitrary(objdata[thisobj]['vertposmin'],objdata[thisobj]['vertposmax']);
+                objimage = objdata[thisobj]['img'];
+
+                objtmp = new objectobj(objimage, objwidth, objheight, objx, objy);
+                objtmp.actiontype = objdata[thisobj]['action'];
+                objects.push(objtmp);
             }
         }
     },
@@ -163,12 +295,17 @@ var lenny = {
             //put code in here that needs to run for the game to work
             lenny.general.clearCanvas(canvas_main,canvas_main_cxt);
             player.runActions();
+            for(i = 0; i < objects.length; i++){
+                objects[i].runActions();
+                if(objects[i].checkCollision(player)){
+                    objects.splice(i, 1);
+                }
+            }
             for(i = 0; i < enemies.length; i++){
                 enemies[i].runActions();
                 enemies[i].move();
                 if(enemies[i].checkCollision(player)){
                     enemies.splice(i, 1);
-                    console.log('hit');
                 }
             }
             setTimeout(lenny.game.gameLoop,10);
