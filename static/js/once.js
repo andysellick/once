@@ -71,6 +71,7 @@ function enemyobj(mysprite, widthactor, heightactor, posx, posy){
     this.direction = 0;
     this.startpos = 0;
     this.moveby = 0; //speed
+    this.points = 1;
 
     this.runActions = function(){
         lenny.general.drawCanvas(this,canvas_main_cxt);
@@ -107,7 +108,7 @@ function enemyobj(mysprite, widthactor, heightactor, posx, posy){
             //collision has occurred
             if(toplefty >= theplayer.ypos && toplefty <= (theplayer.ypos + theplayer.actorheight) || botlefty >= theplayer.ypos && botlefty <= (theplayer.ypos + theplayer.actorwidth)){
                 if(topleftx >= theplayer.xpos && topleftx <= (theplayer.xpos + theplayer.actorwidth) || toprightx >= theplayer.xpos && toprightx <= (theplayer.xpos + theplayer.actorwidth)){
-                    theplayer.points += 1;
+                    theplayer.points += this.points;
                     this.moveby = 0;
                 }
             }
@@ -140,13 +141,13 @@ function objectobj(mysprite, widthactor, heightactor, posx, posy){
     //perform the action that happens when the player touches this object
     this.performTrigger = function(theplayer){
         this.active = 0;
+        theplayer.points += 2;
         switch(this.actiontype){
             case 0:
                 theplayer.ypos += 100;
                 theplayer.xpos = getRandomArbitrary(10, canvas_main.width - 10);
                 break;
             case 1:
-                theplayer.points += 2;
                 break;
         }
     }
@@ -249,6 +250,7 @@ var lenny = {
                     'type': 'level 1',
                     'img': allimages[1],
                     'speed': 0.5,
+                    'points': 1,
                     'vertposmin': 200,
                     'vertposmax': canvas_main.height - 100
                 },
@@ -256,6 +258,7 @@ var lenny = {
                     'type': 'level 2',
                     'img': allimages[2],
                     'speed': 1,
+                    'points': 2,
                     'vertposmin': 120,
                     'vertposmax': canvas_main.height - 150
                 },
@@ -263,6 +266,7 @@ var lenny = {
                     'type': 'level 3',
                     'img': allimages[3],
                     'speed': 0.2,
+                    'points': 3,
                     'vertposmin': 60,
                     'vertposmax': canvas_main.height - 300
                 }
@@ -283,6 +287,7 @@ var lenny = {
                 enemytmp.range = getRandomArbitrary(50,canvas_main.width / 4); //distance the enemy will move
                 enemytmp.direction = getRandomArbitrary(0,1);
                 enemytmp.startpos = enemyx;
+                enemytmp.points = enemydata[thisenemy]['points']
                 enemytmp.moveby = enemydata[thisenemy]['speed']
                 enemies.push(enemytmp);
             }
