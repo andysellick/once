@@ -8,18 +8,21 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="initial-scale=1.0">
     <style>
-        .container {
-            margin:0 auto;
-            padding:0 10px;
-            max-width:1024px;
+        body,
+        html {
+            padding:0;
+            margin:0;
+            background:#000000;
+            text-align:center;
+        }
+        canvas {
+            background:#FFFFFF;
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <canvas id="canvas_main" width="600" height="600" style="border: solid 1px #000"></canvas>
-    </div>
+    <canvas id="canvas_main"></canvas>
 
 
     <!-- Grab Google-hosted jQuery. Fall back to locally saved file if necessary. -->

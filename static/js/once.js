@@ -198,9 +198,23 @@ var lenny = {
         //set up function, starts it off
         initialise: function(){
             canvas_main = document.getElementById('canvas_main');
+            this.initCanvasSize();
             canvas_main_cxt = lenny.general.initCanvas(canvas_main,canvas_main_cxt);
             this.initGame();
             lenny.game.gameLoop();
+        },
+        initCanvasSize: function(){
+            //ideal size for canvas
+            var destwidth = 600;
+            var destheight = 800;
+            var aspect = Math.floor(($(window).height() / destheight) * destwidth);
+
+            var cwidth = Math.min(destwidth, $(window).width());
+            var cheight = Math.min(destheight, $(window).height());
+
+            //resize the canvas to maintain aspect ratio depending on screen size
+            canvas_main.width = Math.min($(window).width(),aspect);
+            canvas_main.height = (canvas_main.width / destwidth) * destheight;
         },
         //initialise the canvas and return the canvas context
         initCanvas: function(canvas, cxt){
@@ -250,16 +264,16 @@ var lenny = {
     people: {
         setupPlayer: function(){
             var playerimage = allimages[0];
-            var playerwidth = 30;
-            var playerheight = 30;
+            var playerwidth = canvas_main.width / 20; //30;
+            var playerheight = canvas_main.width / 20; //30;
             var playerx = (canvas_main.width / 2) - (playerwidth / 2);
             var playery = canvas_main.height - playerheight;
 
             player = new characterobj(playerimage, playerwidth, playerheight, playerx, playery);
         },
         setupEnemies: function(){
-            var enemywidth = 30;
-            var enemyheight = 30;
+            var enemywidth = canvas_main.width / 20; //30;
+            var enemyheight = canvas_main.width / 20; //30;
 
             var enemydata = [
                 {
@@ -308,8 +322,8 @@ var lenny = {
             }
         },
         setupObjects: function(){
-            var objwidth = 30;
-            var objheight = 30;
+            var objwidth = canvas_main.width / 20; //30;
+            var objheight = canvas_main.width / 20; //30;
 
             var objdata = [
                 {
@@ -386,8 +400,19 @@ window.lenny = lenny;
 
 //do stuff
 window.onload = function(){
+/*
+    $canvas = $('#canvas_main');
+    $canvas.width(600);
+    $canvas.height(600);
+    console.log($canvas.width(),$canvas.height());
+*/
+
     lenny.general.initialise();
-    
+
+    $(window).on('resize',function(){
+        resetAndResize();
+    });
+
     $('#canvas_main').mousemove(function(e){
         if(!player.active){
             var parentOffset = $(this).offset();
@@ -401,11 +426,16 @@ window.onload = function(){
             player.launch();
         }
         else {
-            game = 0;
-            clearTimeout(gameloop);
-            lenny.general.initGame();
-            lenny.game.gameLoop();
+            resetAndResize();
         }
     });
+
+    function resetAndResize(){
+        game = 0;
+        clearTimeout(gameloop);
+        lenny.general.initCanvasSize();
+        lenny.general.initGame();
+        lenny.game.gameLoop();
+    }
 
 };
