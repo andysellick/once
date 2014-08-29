@@ -7,9 +7,11 @@ var gameloop;
 //load images
 var allimages = ['player.png','enemy1.png','enemy2.png','enemy3.png','explosion.png'];
 var objectimages = ['object1.png','object2.png','object3.png'];
+var levelimages = ['level1.png']
 
 allimages = preloadImages(allimages);
 objectimages = preloadImages(objectimages);
+levelimages = preloadImages(levelimages);
 
 var player;
 var enemies = [];
@@ -44,8 +46,11 @@ function characterobj(mysprite, widthactor, heightactor, posx, posy){
     this.ypos = posy;
     this.speed = 1;
     this.points = 0;
-
+    this.level = 1;
+    this.xp = 0;
+    this.score = 1;
     this.active = 0;
+    this.partysize = 1;
 
     this.runActions = function(){
         if(this.active){
@@ -60,6 +65,12 @@ function characterobj(mysprite, widthactor, heightactor, posx, posy){
     };
     this.launch = function(){
         this.active = 1;
+    };
+    this.levelUp = function(levelup){
+        if(this.xp > 2 || levelup){ //if the player has levelled up
+            this.level += 1;
+            this.xp = 0;
+        }
     };
 }
 
@@ -78,7 +89,8 @@ function enemyobj(mysprite, widthactor, heightactor, posx, posy){
     this.direction = 0;
     this.startpos = 0;
     this.moveby = 0; //speed
-    this.points = 1;
+    this.xp = 1;
+    this.level = 1;
 
     this.runActions = function(){
         lenny.general.drawCanvas(this,canvas_main_cxt);
@@ -115,9 +127,19 @@ function enemyobj(mysprite, widthactor, heightactor, posx, posy){
             //collision has occurred
             if(toplefty >= theplayer.ypos && toplefty <= (theplayer.ypos + theplayer.actorheight) || botlefty >= theplayer.ypos && botlefty <= (theplayer.ypos + theplayer.actorwidth)){
                 if(topleftx >= theplayer.xpos && topleftx <= (theplayer.xpos + theplayer.actorwidth) || toprightx >= theplayer.xpos && toprightx <= (theplayer.xpos + theplayer.actorwidth)){
-                    theplayer.points += this.points;
-                    theplayer.ypos += 10;
-                    this.moveby = 0;
+                    console.log(theplayer.level);
+                    //if we can kill this monster
+                    if(theplayer.level >= this.level){
+                        theplayer.xp += this.xp;
+                        theplayer.score += this.xp;
+                        theplayer.ypos += 10;
+                        this.moveby = 0;
+                        theplayer.levelUp(0);
+                    }
+                    else {
+                        theplayer.score = theplayer.level * theplayer.score;
+                        lenny.general.endGame();
+                    }
                 }
             }
         }
@@ -154,17 +176,20 @@ function objectobj(mysprite, widthactor, heightactor, posx, posy){
         this.active = 0;
         theplayer.points += 2;
         switch(this.actiontype){
-            case 0:
-                theplayer.ypos += 100;
+            case 0: //teleport
+                theplayer.ypos = Math.max(theplayer.ypos + canvas_main.height / 8, canvas_main.height - theplayer.actorheight);
                 theplayer.xpos = getRandomArbitrary(10, canvas_main.width - 30);
                 break;
-            case 1:
+            case 1: //sword, nothing yet
                 break;
-            case 2:
-                theplayer.actorwidth = Math.min(theplayer.actorwidth + 30, 90); //3x party companions
-                theplayer.spritewidth = Math.min(theplayer.spritewidth + 20, 60);
-                if(theplayer.spritewidth < 60) //just doing this roughly to begin with, need better non-hardcoded mechanism
-                    theplayer.xpos -= theplayer.actorwidth / 2;
+            case 2: //increase party size
+                //player width is width of canvas / 20, maximum width is 3x, i.e. 3 party companions
+                theplayer.partysize += 1;
+                theplayer.actorwidth = Math.min(theplayer.actorwidth + (canvas_main.width / 20), (canvas_main.width / 20) * 3);
+                theplayer.spritewidth = Math.min(theplayer.spritewidth + 20, 60); //these numbers are hard coded to reflect the actual size of the sprite, i.e. 60x20
+                if(theplayer.partysize < 4){
+                    theplayer.xpos -= theplayer.actorwidth / 4;
+                }
                 break;
         }
     }
@@ -183,6 +208,7 @@ function objectobj(mysprite, widthactor, heightactor, posx, posy){
             if(toplefty >= theplayer.ypos && toplefty <= (theplayer.ypos + theplayer.actorheight) || botlefty >= theplayer.ypos && botlefty <= (theplayer.ypos + theplayer.actorwidth)){
                 if(topleftx >= theplayer.xpos && topleftx <= (theplayer.xpos + theplayer.actorwidth) || toprightx >= theplayer.xpos && toprightx <= (theplayer.xpos + theplayer.actorwidth)){
                     this.performTrigger(theplayer);
+                    theplayer.levelUp(1);
                     return(1);
                 }
             }
@@ -237,11 +263,10 @@ var lenny = {
             lenny.people.setupObjects();
         },
         endGame: function(){
-            game = 0;
             canvas_main_cxt.font = "30px Arial";
             canvas_main_cxt.fillStyle = "#000000";
             canvas_main_cxt.textAlign = "center";
-
+            game = 0;
             /*
             canvas_main_cxt.shadowColor = "#a98c8c";
             canvas_main_cxt.shadowOffsetX = 2;
@@ -275,30 +300,36 @@ var lenny = {
             var enemywidth = canvas_main.width / 20; //30;
             var enemyheight = canvas_main.width / 20; //30;
 
+            //all calculations are done on the assumption that the general dimensions are 600x800
+            //vertposmin = closest this can be positioned to the top
+            //vertposmax = closest this can be positioned to the bottom
             var enemydata = [
                 {
                     'type': 'level 1',
                     'img': allimages[1],
                     'speed': 0.5,
-                    'points': 1,
-                    'vertposmin': 200,
-                    'vertposmax': canvas_main.height - 100
+                    'level': 1,
+                    'xp': 1,
+                    'vertposmin': canvas_main.height / 4,
+                    'vertposmax': canvas_main.height - (canvas_main.height / 8)
                 },
                 {
                     'type': 'level 2',
                     'img': allimages[2],
                     'speed': 1,
-                    'points': 2,
-                    'vertposmin': 120,
-                    'vertposmax': canvas_main.height - 150
+                    'level': 2,
+                    'xp': 1,
+                    'vertposmin': canvas_main.height / 3,
+                    'vertposmax': canvas_main.height - (canvas_main.height / 4)
                 },
                 {
                     'type': 'level 3',
                     'img': allimages[3],
                     'speed': 0.2,
-                    'points': 3,
-                    'vertposmin': 60,
-                    'vertposmax': canvas_main.height - 300
+                    'level': 3,
+                    'xp': 1,
+                    'vertposmin': canvas_main.height / 10,
+                    'vertposmax': canvas_main.height - (canvas_main.height / 2)
                 }
             ];
 
@@ -316,8 +347,9 @@ var lenny = {
                 enemytmp.range = getRandomArbitrary(50,canvas_main.width / 4); //distance the enemy will move
                 enemytmp.direction = getRandomArbitrary(0,1);
                 enemytmp.startpos = enemyx;
-                enemytmp.points = enemydata[thisenemy]['points']
-                enemytmp.moveby = enemydata[thisenemy]['speed']
+                enemytmp.xp = enemydata[thisenemy]['xp'];
+                enemytmp.level = enemydata[thisenemy]['level'];
+                enemytmp.moveby = enemydata[thisenemy]['speed'];
                 enemies.push(enemytmp);
             }
         },
@@ -329,22 +361,22 @@ var lenny = {
                 {
                     'type': 'teleport',
                     'img': objectimages[0],
-                    'vertposmin': 10,
-                    'vertposmax': canvas_main.height - 120,
+                    'vertposmin': canvas_main.height / 10,
+                    'vertposmax': canvas_main.height - (canvas_main.height / 10),
                     'action':0
                 },
                 {
                     'type': 'level up',
                     'img': objectimages[1],
-                    'vertposmin': 10,
-                    'vertposmax': canvas_main.height - 120,
+                    'vertposmin': canvas_main.height / 10,
+                    'vertposmax': canvas_main.height - (canvas_main.height / 10),
                     'action':1
                 },
                 {
                     'type': 'party up',
                     'img': objectimages[2],
-                    'vertposmin': 10,
-                    'vertposmax': canvas_main.height - 120,
+                    'vertposmin': canvas_main.height / 10,
+                    'vertposmax': canvas_main.height - (canvas_main.height / 10),
                     'action':2
                 }
             ]
@@ -370,12 +402,17 @@ var lenny = {
             //put code in here that needs to run for the game to work
             if(game){
                 lenny.general.clearCanvas(canvas_main,canvas_main_cxt);
+                //draw level
+                canvas_main_cxt.drawImage(levelimages[0],0,0,levelimages[0].width,levelimages[0].height,0,0,canvas_main.width,canvas_main.height);
+
+                //draw objects
                 for(i = 0; i < objects.length; i++){
                     objects[i].runActions();
                     if(objects[i].checkCollision(player)){
                         objects.splice(i, 1);
                     }
                 }
+                //draw enemies
                 for(i = 0; i < enemies.length; i++){
                     enemies[i].runActions();
                     enemies[i].move();
@@ -383,12 +420,13 @@ var lenny = {
                         enemies.splice(i, 1);
                     }
                 }
+                //draw player
                 player.runActions();
-                gameloop = setTimeout(lenny.game.gameLoop,10);
+                gameloop = setTimeout(lenny.game.gameLoop,10); //repeat
             }
             else {
                 canvas_main_cxt.fillText("GAME OVER", canvas_main.width / 2, canvas_main.height - 60);
-                canvas_main_cxt.fillText("Score: " + player.points, canvas_main.width / 2, canvas_main.height - 30);
+                canvas_main_cxt.fillText("Score: " + player.score, canvas_main.width / 2, canvas_main.height - 30);
                 canvas_main_cxt.font = "14px Arial";
                 canvas_main_cxt.fillText("Click to play again", canvas_main.width / 2, canvas_main.height - 10);
             }
@@ -400,13 +438,6 @@ window.lenny = lenny;
 
 //do stuff
 window.onload = function(){
-/*
-    $canvas = $('#canvas_main');
-    $canvas.width(600);
-    $canvas.height(600);
-    console.log($canvas.width(),$canvas.height());
-*/
-
     lenny.general.initialise();
 
     $(window).on('resize',function(){
