@@ -20,6 +20,7 @@ function characterobj(){
     this.spritex = 0;
     this.spritey = 0;
     this.spritewidth = 20;
+    this.spriteheight = 20;
     this.actorwidth;
     this.actorheight;
     this.xpos;
@@ -75,6 +76,7 @@ function enemyobj(){
     this.spritex = 0;
     this.spritey = 0;
     this.spritewidth = 0;
+    this.spriteheight = 0;
     this.actorwidth;
     this.actorheight;
     this.xpos;
@@ -130,6 +132,7 @@ function enemyobj(){
         }
         else { //perform death of this enemy
             this.spritewidth = 20; //reset this in case the enemy uses a larger sprite than the 'explosion' sprite
+            this.spriteheight = 20;
             this.sprite = allimages[1];
         }
         return(0);
@@ -142,6 +145,7 @@ function objectobj(){
     this.spritex = 0;
     this.spritey = 0;
     this.spritewidth = 20;
+    this.spriteheight = 20;
     this.actorwidth;
     this.actorheight;
     this.xpos;
@@ -266,7 +270,7 @@ var lenny = {
         },
         //draw some object on the canvas
         drawOnCanvas: function(object, cxt){
-            cxt.drawImage(object.sprite, object.spritex, object.spritey, object.spritewidth, 20, object.xpos, object.ypos, object.actorwidth, object.actorheight);
+            cxt.drawImage(object.sprite, object.spritex, object.spritey, object.spritewidth, object.spriteheight, object.xpos, object.ypos, object.actorwidth, object.actorheight);
         },
         //completely clear the canvas
         clearCanvas: function(canvas, cxt){
@@ -292,26 +296,29 @@ var lenny = {
             var enemycount = 50;
             var enemytmp;
 
-            for(i = 0; i < enemycount; i++){
-                thisenemy = Math.floor(getRandomArbitrary(0,enemyinfo.length));
+            //for(i = 0; i < enemycount; i++){
+            for(i = 0; i < enemyinfo.length; i++){
+                //thisenemy = Math.floor(getRandomArbitrary(0,enemyinfo.length));
+                for(j = 0; j < enemyinfo[i]['levelcount'][level - 1]; j++){
+                    enemyx = getRandomArbitrary(0,canvas_main.width); //randomly position x
+                    enemyy = getRandomArbitrary(enemyinfo[i]['vertposmin'],enemyinfo[i]['vertposmax']);
 
-                enemyx = getRandomArbitrary(0,canvas_main.width); //randomly position x
-                enemyy = getRandomArbitrary(enemyinfo[thisenemy]['vertposmin'],enemyinfo[thisenemy]['vertposmax']);
-
-                enemytmp = new enemyobj();
-                enemytmp.sprite = enemyinfo[thisenemy]['img'];
-                enemytmp.spritewidth = enemyinfo[thisenemy]['spritewidth'];
-                enemytmp.actorwidth = enemyinfo[thisenemy]['width'];
-                enemytmp.actorheight = enemyinfo[thisenemy]['height'];
-                enemytmp.xpos = getRandomArbitrary(0,canvas_main.width); //randomly position x
-                enemytmp.ypos = getRandomArbitrary(enemyinfo[thisenemy]['vertposmin'],enemyinfo[thisenemy]['vertposmax']);
-                enemytmp.range = getRandomArbitrary(50,canvas_main.width / 4); //distance the enemy will move
-                enemytmp.direction = getRandomArbitrary(0,1);
-                enemytmp.startpos = enemytmp.xpos;
-                enemytmp.xp = enemyinfo[thisenemy]['xp'];
-                enemytmp.level = enemyinfo[thisenemy]['level'];
-                enemytmp.moveby = enemyinfo[thisenemy]['speed'];
-                enemies.push(enemytmp);
+                    enemytmp = new enemyobj();
+                    enemytmp.sprite = enemyinfo[i]['img'];
+                    enemytmp.spritewidth = enemyinfo[i]['spritewidth'];
+                    enemytmp.spriteheight = enemyinfo[i]['spriteheight'];
+                    enemytmp.actorwidth = enemyinfo[i]['width'];
+                    enemytmp.actorheight = enemyinfo[i]['height'];
+                    enemytmp.xpos = getRandomArbitrary(0,canvas_main.width); //randomly position x
+                    enemytmp.ypos = getRandomArbitrary(enemyinfo[i]['vertposmin'],enemyinfo[i]['vertposmax']);
+                    enemytmp.range = getRandomArbitrary(50,canvas_main.width / 4); //distance the enemy will move
+                    enemytmp.direction = getRandomArbitrary(0,1);
+                    enemytmp.startpos = enemytmp.xpos;
+                    enemytmp.xp = enemyinfo[i]['xp'];
+                    enemytmp.level = enemyinfo[i]['level'];
+                    enemytmp.moveby = enemyinfo[i]['speed'];
+                    enemies.push(enemytmp);
+                }
             }
         },
         //initialise data for power ups
@@ -378,8 +385,8 @@ window.onload = function(){
             var relX = e.pageX - parentOffset.left;
             player.xpos = parseInt(relX);
             //allow mouse to move player vertically as well for collision detection testing
-            var relY = e.pageY - parentOffset.top;
-            player.ypos = parseInt(relY);
+            //var relY = e.pageY - parentOffset.top;
+            //player.ypos = parseInt(relY);
 
         }
     });

@@ -1,7 +1,7 @@
 
 //load images
 var allimages = ['player.png','explosion.png','player_expired.png'];
-var enemyimages = ['enemy1.png','enemy2.png','enemy3.png','enemy4.png'];
+var enemyimages = ['enemy1.png','enemy2.png','enemy3.png','enemy4.png','enemy5.png'];
 var objectimages = ['object1.png','object2.png','object3.png'];
 var levelimages = ['level1.png','level2.png']
 
@@ -42,7 +42,9 @@ function enemydata(canvas_main){
             'vertposmax': canvas_main.height - (canvas_main.height / 8),
             'width': enemywidth,
             'height': enemyheight,
-            'spritewidth': spritewidth
+            'spritewidth': spritewidth,
+            'spriteheight': 20,
+            'levelcount': [20,15]
         },
         {
             'type': 'blob',
@@ -54,31 +56,51 @@ function enemydata(canvas_main){
             'vertposmax': canvas_main.height - (canvas_main.height / 4),
             'width': enemywidth,
             'height': enemyheight,
-            'spritewidth': spritewidth
+            'spritewidth': spritewidth,
+            'spriteheight': 20,
+            'levelcount': [10,15]
         },
         {
             'type': 'wolf',
             'img': enemyimages[2],
-            'speed': 1,
+            'speed': 0.9,
             'level': 3,
             'xp': 1,
             'vertposmin': canvas_main.height / 10,
             'vertposmax': canvas_main.height - (canvas_main.height / 2),
             'width': enemywidth,
             'height': enemyheight,
-            'spritewidth': spritewidth
+            'spritewidth': spritewidth,
+            'spriteheight': 20,
+            'levelcount': [6,8]
         },
         {
             'type': 'bear',
             'img': enemyimages[3],
             'speed': 0.3,
-            'level': 4,
+            'level': 5,
             'xp': 1,
             'vertposmin': canvas_main.height / 10,
             'vertposmax': canvas_main.height - (canvas_main.height / 1.5),
             'width': enemywidth * 2,
             'height': enemyheight,
-            'spritewidth': 40
+            'spritewidth': 40,
+            'spriteheight': 20,
+            'levelcount': [5,5]
+        },
+        {
+            'type': 'dragon',
+            'img': enemyimages[4],
+            'speed': 0.2,
+            'level': 7,
+            'xp': 1,
+            'vertposmin': canvas_main.height / 20,
+            'vertposmax': canvas_main.height / 10,
+            'width': enemywidth * 2,
+            'height': enemyheight * 1.5,
+            'spritewidth': 40,
+            'spriteheight': 30,
+            'levelcount': [2,5]
         }
     ];
     return(enemydata);
