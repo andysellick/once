@@ -5,32 +5,9 @@ var game = 0;
 var gameloop;
 var level = 1;
 
-//load images
-var allimages = ['player.png','explosion.png'];
-var enemyimages = ['enemy1.png','enemy2.png','enemy3.png','enemy4.png'];
-var objectimages = ['object1.png','object2.png','object3.png'];
-var levelimages = ['level1.png','level2.png']
-
-allimages = preloadImages(allimages);
-enemyimages = preloadImages(enemyimages);
-objectimages = preloadImages(objectimages);
-levelimages = preloadImages(levelimages);
-
 var player;
 var enemies = [];
 var objects = [];
-
-//preload images
-function preloadImages(array){
-    var imagedir = 'static/img/';
-    var tempimg;
-    for(i in array){
-        tempimg = new Image();
-        tempimg.src = imagedir + array[i];
-        array[i] = tempimg;
-    }
-    return(array);
-}
 
 // Returns a random number between min (inclusive) and max (exclusive)
 function getRandomArbitrary(min, max) {
@@ -85,18 +62,23 @@ function characterobj(){
             this.xp = 0;
         }
     };
+    this.expire = function(){
+        //would be nice to change the player image here
+        this.sprite = allimages[2];
+        return(0);
+    };
 }
 
 //general object for enemy
-function enemyobj(mysprite, widthactor, heightactor, posx, posy){
-    this.sprite = mysprite;
+function enemyobj(){
+    this.sprite;
     this.spritex = 0;
     this.spritey = 0;
     this.spritewidth = 0;
-    this.actorwidth = widthactor;
-    this.actorheight = heightactor;
-    this.xpos = posx;
-    this.ypos = posy;
+    this.actorwidth;
+    this.actorheight;
+    this.xpos;
+    this.ypos;
 
     this.range = 0;
     this.direction = 0;
@@ -141,32 +123,29 @@ function enemyobj(mysprite, widthactor, heightactor, posx, posy){
                 }
                 else {
                     theplayer.score = theplayer.level * theplayer.score;
+                    theplayer.expire();
                     lenny.general.endGame();
                 }
             }
         }
-        else {
-            this.expire();
+        else { //perform death of this enemy
+            this.spritewidth = 20; //reset this in case the enemy uses a larger sprite than the 'explosion' sprite
+            this.sprite = allimages[1];
         }
         return(0);
     };
-    //perform death of this enemy
-    this.expire = function(){
-        this.spritewidth = 20; //reset this in case the enemy uses a larger sprite than the 'explosion' sprite
-        this.sprite = allimages[1];
-    }
 }
 
 //general object for object
-function objectobj(mysprite, widthactor, heightactor, posx, posy){
-    this.sprite = mysprite;
+function objectobj(){
+    this.sprite;
     this.spritex = 0;
     this.spritey = 0;
     this.spritewidth = 20;
-    this.actorwidth = widthactor;
-    this.actorheight = heightactor;
-    this.xpos = posx;
-    this.ypos = posy;
+    this.actorwidth;
+    this.actorheight;
+    this.xpos;
+    this.ypos;
 
     this.active = 1;
     this.actiontype = 0;
@@ -298,6 +277,7 @@ var lenny = {
         }
     },
     people: {
+        //initialise data for the player object
         setupPlayer: function(){
             player = new characterobj();
             player.sprite = allimages[0];
@@ -306,155 +286,74 @@ var lenny = {
             player.xpos = (canvas_main.width / 2) - (player.actorwidth / 2);
             player.ypos = canvas_main.height - player.actorheight;
         },
+        //initialise data for the enemies
         setupEnemies: function(){
-            var enemywidth = canvas_main.width / 20; //30;
-            var enemyheight = canvas_main.width / 20; //30;
-            var spritewidth = 20;
-
-            //all calculations are done on the assumption that the general dimensions are 600x800
-            //vertposmin = closest this can be positioned to the top
-            //vertposmax = closest this can be positioned to the bottom
-            var enemydata = [
-                {
-                    'type': 'ghost',
-                    'img': enemyimages[0],
-                    'speed': 0.5,
-                    'level': 1,
-                    'xp': 1,
-                    'vertposmin': canvas_main.height / 4,
-                    'vertposmax': canvas_main.height - (canvas_main.height / 8),
-                    'width': enemywidth,
-                    'height': enemyheight,
-                    'spritewidth': spritewidth
-                },
-                {
-                    'type': 'blob',
-                    'img': enemyimages[1],
-                    'speed': 0.7,
-                    'level': 2,
-                    'xp': 1,
-                    'vertposmin': canvas_main.height / 3,
-                    'vertposmax': canvas_main.height - (canvas_main.height / 4),
-                    'width': enemywidth,
-                    'height': enemyheight,
-                    'spritewidth': spritewidth
-                },
-                {
-                    'type': 'wolf',
-                    'img': enemyimages[2],
-                    'speed': 1,
-                    'level': 3,
-                    'xp': 1,
-                    'vertposmin': canvas_main.height / 10,
-                    'vertposmax': canvas_main.height - (canvas_main.height / 2),
-                    'width': enemywidth,
-                    'height': enemyheight,
-                    'spritewidth': spritewidth
-                },
-                {
-                    'type': 'bear',
-                    'img': enemyimages[3],
-                    'speed': 0.3,
-                    'level': 4,
-                    'xp': 1,
-                    'vertposmin': canvas_main.height / 20,
-                    'vertposmax': canvas_main.height - (canvas_main.height / 1.5),
-                    'width': enemywidth * 2,
-                    'height': enemyheight,
-                    'spritewidth': 40
-                }
-            ];
-
+            var enemyinfo = enemydata(canvas_main);
             var enemycount = 50;
             var enemytmp;
 
             for(i = 0; i < enemycount; i++){
-                thisenemy = Math.floor(getRandomArbitrary(0,enemydata.length));
+                thisenemy = Math.floor(getRandomArbitrary(0,enemyinfo.length));
 
                 enemyx = getRandomArbitrary(0,canvas_main.width); //randomly position x
-                enemyy = getRandomArbitrary(enemydata[thisenemy]['vertposmin'],enemydata[thisenemy]['vertposmax']);
-                enemyimage = enemydata[thisenemy]['img'];
+                enemyy = getRandomArbitrary(enemyinfo[thisenemy]['vertposmin'],enemyinfo[thisenemy]['vertposmax']);
 
-                enemytmp = new enemyobj(enemyimage, enemydata[thisenemy]['width'], enemydata[thisenemy]['height'], enemyx, enemyy);
+                enemytmp = new enemyobj();
+                enemytmp.sprite = enemyinfo[thisenemy]['img'];
+                enemytmp.spritewidth = enemyinfo[thisenemy]['spritewidth'];
+                enemytmp.actorwidth = enemyinfo[thisenemy]['width'];
+                enemytmp.actorheight = enemyinfo[thisenemy]['height'];
+                enemytmp.xpos = getRandomArbitrary(0,canvas_main.width); //randomly position x
+                enemytmp.ypos = getRandomArbitrary(enemyinfo[thisenemy]['vertposmin'],enemyinfo[thisenemy]['vertposmax']);
                 enemytmp.range = getRandomArbitrary(50,canvas_main.width / 4); //distance the enemy will move
                 enemytmp.direction = getRandomArbitrary(0,1);
-                enemytmp.startpos = enemyx;
-                enemytmp.spritewidth = enemydata[thisenemy]['spritewidth'];
-                enemytmp.xp = enemydata[thisenemy]['xp'];
-                enemytmp.level = enemydata[thisenemy]['level'];
-                enemytmp.moveby = enemydata[thisenemy]['speed'];
+                enemytmp.startpos = enemytmp.xpos;
+                enemytmp.xp = enemyinfo[thisenemy]['xp'];
+                enemytmp.level = enemyinfo[thisenemy]['level'];
+                enemytmp.moveby = enemyinfo[thisenemy]['speed'];
                 enemies.push(enemytmp);
             }
         },
+        //initialise data for power ups
         setupObjects: function(){
-            var objwidth = canvas_main.width / 20; //30;
-            var objheight = canvas_main.width / 20; //30;
-
-            var objdata = [
-                {
-                    'type': 'teleport',
-                    'img': objectimages[0],
-                    'vertposmin': canvas_main.height / 10,
-                    'vertposmax': canvas_main.height - (canvas_main.height / 10),
-                    'action':0
-                },
-                {
-                    'type': 'level up',
-                    'img': objectimages[1],
-                    'vertposmin': canvas_main.height / 10,
-                    'vertposmax': canvas_main.height - (canvas_main.height / 10),
-                    'action':1
-                },
-                {
-                    'type': 'party up',
-                    'img': objectimages[2],
-                    'vertposmin': canvas_main.height / 10,
-                    'vertposmax': canvas_main.height - (canvas_main.height / 10),
-                    'action':2
-                }
-            ]
-
+            var objectinfo = objdata(canvas_main);
             var objcount = 5;
             var objtmp;
 
             for(i = 0; i < objcount; i++){
-                thisobj = Math.floor(getRandomArbitrary(0,objdata.length));
-
-                objx = getRandomArbitrary(0,canvas_main.width); //randomly position x
-                objy = getRandomArbitrary(objdata[thisobj]['vertposmin'],objdata[thisobj]['vertposmax']);
-                objimage = objdata[thisobj]['img'];
-
-                objtmp = new objectobj(objimage, objwidth, objheight, objx, objy);
-                objtmp.actiontype = objdata[thisobj]['action'];
+                thisobj = Math.floor(getRandomArbitrary(0,objectinfo.length));
+                objtmp = new objectobj();
+                objtmp.sprite = objectinfo[thisobj]['img'];
+                objtmp.actorwidth = objectinfo[thisobj]['width'];
+                objtmp.actorheight = objectinfo[thisobj]['height'];
+                objtmp.xpos = getRandomArbitrary(0,canvas_main.width); //randomly position x
+                objtmp.ypos = getRandomArbitrary(objectinfo[thisobj]['vertposmin'],objectinfo[thisobj]['vertposmax']);
+                objtmp.actiontype = objectinfo[thisobj]['action'];
                 objects.push(objtmp);
             }
         }
     },
     game: {
-        gameLoop: function(){
-            //put code in here that needs to run for the game to work
+        gameLoop: function(){ //put code in here that needs to run for the game to work
             if(game){
-                lenny.general.clearCanvas(canvas_main,canvas_main_cxt);
-                //draw level
-                canvas_main_cxt.drawImage(levelimages[level - 1],0,0,levelimages[0].width,levelimages[0].height,0,0,canvas_main.width,canvas_main.height);
+                lenny.general.clearCanvas(canvas_main,canvas_main_cxt); //clear canvas
+                canvas_main_cxt.drawImage(levelimages[level - 1],0,0,levelimages[0].width,levelimages[0].height,0,0,canvas_main.width,canvas_main.height); //draw level
 
-                //draw objects
-                for(i = 0; i < objects.length; i++){
+                for(i = 0; i < objects.length; i++){ //draw objects
                     objects[i].runActions();
                     if(objects[i].checkCollision(player)){
                         objects.splice(i, 1);
                     }
                 }
-                //draw enemies
-                for(i = 0; i < enemies.length; i++){
+
+                for(i = 0; i < enemies.length; i++){ //draw enemies
                     enemies[i].runActions();
                     enemies[i].move();
                     if(enemies[i].checkCollision(player)){
                         enemies.splice(i, 1);
                     }
                 }
-                //draw player
-                player.runActions();
+                player.runActions(); //draw player
                 gameloop = setTimeout(lenny.game.gameLoop,10); //repeat
             }
             else {
