@@ -164,7 +164,7 @@ function objectobj(){
         switch(this.actiontype){
             case 0: //teleport
                 theplayer.ypos = Math.min(theplayer.ypos + canvas_main.height / 10, canvas_main.height - theplayer.actorheight);
-                theplayer.xpos = getRandomArbitrary(10, canvas_main.width - 30);
+                theplayer.xpos = getRandomArbitrary(canvas_main.width / 10, canvas_main.width - canvas_main.width / 10);
                 break;
             case 1: //sword, nothing yet
                 break;
@@ -333,7 +333,7 @@ var lenny = {
                 objtmp.sprite = objectinfo[thisobj]['img'];
                 objtmp.actorwidth = objectinfo[thisobj]['width'];
                 objtmp.actorheight = objectinfo[thisobj]['height'];
-                objtmp.xpos = getRandomArbitrary(0,canvas_main.width); //randomly position x
+                objtmp.xpos = getRandomArbitrary(canvas_main.width / 10,canvas_main.width - canvas_main.width / 10); //randomly position x
                 objtmp.ypos = getRandomArbitrary(objectinfo[thisobj]['vertposmin'],objectinfo[thisobj]['vertposmax']);
                 objtmp.actiontype = objectinfo[thisobj]['action'];
                 objects.push(objtmp);
