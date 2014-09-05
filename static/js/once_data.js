@@ -74,7 +74,7 @@ function enemydata(canvas_main){
             'speed': 0.3,
             'level': 4,
             'xp': 1,
-            'vertposmin': canvas_main.height / 20,
+            'vertposmin': canvas_main.height / 10,
             'vertposmax': canvas_main.height - (canvas_main.height / 1.5),
             'width': enemywidth * 2,
             'height': enemyheight,

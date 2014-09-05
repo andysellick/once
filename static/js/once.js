@@ -189,22 +189,22 @@ function objectobj(){
 }
 
 //generic collision checking function between any given object and the player
-function checkPlayerCollision(obj,theplayer){
-    var topleftx = obj.xpos;
-    var toplefty = obj.ypos;
-    var toprightx = obj.xpos + obj.actorwidth;
-    var toprighty = obj.ypos;
-    var botleftx = obj.xpos;
-    var botlefty = obj.ypos + obj.actorheight;
-    var botrightx = obj.xpos + obj.actorwidth;
-    var botrighty = obj.ypos + obj.actorwidth;
+function checkPlayerCollision(obj,tp){
+    //rule out any possible collisions, remembering that all y numbers are inverted on canvas
+    //player bottom edge is higher than object top edge
+    if(tp.ypos + tp.actorheight < obj.ypos)
+        return(0);
+    //player top edge is lower than obj bottom edge
+    if(tp.ypos > obj.ypos + obj.actorheight)
+        return(0);
+    //player left edge is to the right of obj right edge
+    if(tp.xpos > obj.xpos + obj.actorwidth)
+        return(0);
+    //player right edge is to the left of obj left edge
+    if(tp.xpos + tp.actorwidth < obj.xpos)
+        return(0);
 
-    if(toplefty >= theplayer.ypos && toplefty <= (theplayer.ypos + theplayer.actorheight) || botlefty >= theplayer.ypos && botlefty <= (theplayer.ypos + theplayer.actorwidth)){
-        if(topleftx >= theplayer.xpos && topleftx <= (theplayer.xpos + theplayer.actorwidth) || toprightx >= theplayer.xpos && toprightx <= (theplayer.xpos + theplayer.actorwidth)){
-            return(1);
-        }
-    }
-    return(0);
+    return(1); //collision
 }
 
 
@@ -338,20 +338,16 @@ var lenny = {
             if(game){
                 lenny.general.clearCanvas(canvas_main,canvas_main_cxt); //clear canvas
                 canvas_main_cxt.drawImage(levelimages[level - 1],0,0,levelimages[0].width,levelimages[0].height,0,0,canvas_main.width,canvas_main.height); //draw level
-
                 for(i = 0; i < objects.length; i++){ //draw objects
                     objects[i].runActions();
-                    if(objects[i].checkCollision(player)){
+                    if(objects[i].checkCollision(player))
                         objects.splice(i, 1);
-                    }
                 }
-
                 for(i = 0; i < enemies.length; i++){ //draw enemies
                     enemies[i].runActions();
                     enemies[i].move();
-                    if(enemies[i].checkCollision(player)){
+                    if(enemies[i].checkCollision(player))
                         enemies.splice(i, 1);
-                    }
                 }
                 player.runActions(); //draw player
                 gameloop = setTimeout(lenny.game.gameLoop,10); //repeat
@@ -381,6 +377,10 @@ window.onload = function(){
             var parentOffset = $(this).offset();
             var relX = e.pageX - parentOffset.left;
             player.xpos = parseInt(relX);
+            //allow mouse to move player vertically as well for collision detection testing
+            var relY = e.pageY - parentOffset.top;
+            player.ypos = parseInt(relY);
+
         }
     });
 
