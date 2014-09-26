@@ -2,8 +2,10 @@
 var canvas_main;
 var canvas_main_cxt;
 var game = 0;
+var gamepause = 0;
 var gameloop;
 var level = 1;
+var victory = 0;
 
 var player;
 var enemies = [];
@@ -44,7 +46,12 @@ function characterobj(){
                     enemies = [];
                     objects = [];
                     lenny.people.setupEnemies();
-                    lenny.people.setupObjects();
+                    if(level == 4){ //final level
+                        player.xpos = (canvas_main.width / 2) - (player.actorwidth / 2);
+                    }
+                    else {
+                        lenny.people.setupObjects();
+                    }
                     this.ypos = canvas_main.height - this.actorheight;
                 }
                 else { //or end the game
@@ -62,6 +69,7 @@ function characterobj(){
             this.level += 1;
             this.xp = 0;
         }
+        console.log("xp: %d, score: %d, level: %d.",player.xp,player.score,player.level);
     };
     this.expire = function(){
         //would be nice to change the player image here
@@ -82,6 +90,7 @@ function enemyobj(){
     this.xpos;
     this.ypos;
 
+    this.etype;
     this.range = 0;
     this.direction = 0;
     this.startpos = 0;
@@ -111,29 +120,35 @@ function enemyobj(){
     };
     //check to see if this enemy has hit the player
     this.checkCollision = function(theplayer){
-        if(this.moveby){
+        if(this.moveby || this.etype == 'boss'){
             if(checkPlayerCollision(this,theplayer)){
                 //if we can kill this monster
                 if(theplayer.level >= this.level){
-                    console.log("Pre collision - player xp: %d, score: %d, level: %d. Enemy xp: %d, level: %d",theplayer.xp,theplayer.score,theplayer.level,this.xp,this.level);
+                    //console.log("Pre collision - player xp: %d, score: %d, level: %d. Enemy xp: %d, level: %d",theplayer.xp,theplayer.score,theplayer.level,this.xp,this.level);
                     theplayer.xp += this.xp;
-                    theplayer.score += this.xp * this.level;
+                    theplayer.score += this.xp;
                     theplayer.ypos += 10;
                     this.moveby = 0;
                     theplayer.levelUp(0);
-                    console.log("post collision - player xp: %d, score: %d, level: %d.",theplayer.xp,theplayer.score,theplayer.level);
+                    //console.log("post collision - player xp: %d, score: %d, level: %d.",theplayer.xp,theplayer.score,theplayer.level);
+
+                    //perform death of this enemy
+                    this.spritewidth = 20; //reset this in case the enemy uses a larger sprite than the 'explosion' sprite
+                    this.spriteheight = 20;
+                    this.sprite = allimages[1];
+                    if(this.etype == 'boss'){
+                        victory = 1;
+                    }
+                    else {
+                        lenny.general.pauseGame();
+                    }
                 }
                 else {
-                    theplayer.score = theplayer.level * theplayer.score;
+                    //theplayer.score = theplayer.level * theplayer.score;
                     theplayer.expire();
                     lenny.general.endGame();
                 }
             }
-        }
-        else { //perform death of this enemy
-            this.spritewidth = 20; //reset this in case the enemy uses a larger sprite than the 'explosion' sprite
-            this.spriteheight = 20;
-            this.sprite = allimages[1];
         }
         return(0);
     };
@@ -256,11 +271,23 @@ var lenny = {
             lenny.people.setupEnemies();
             lenny.people.setupObjects();
         },
+        //pause the game for a few milliseconds
+        pauseGame: function(){
+            gamepause = 1;
+            clearTimeout(gameloop);
+            setTimeout(lenny.general.resumeGame,140);
+        },
+        //resume the game
+        resumeGame: function(){
+            gamepause = 0;
+            gameloop = setTimeout(lenny.game.gameLoop,15);
+        },
         endGame: function(){
             canvas_main_cxt.font = "30px Arial";
             canvas_main_cxt.fillStyle = "#000000";
             canvas_main_cxt.textAlign = "center";
             game = 0;
+            player.score = player.score * level;
             /*
             canvas_main_cxt.shadowColor = "#a98c8c";
             canvas_main_cxt.shadowOffsetX = 2;
@@ -309,8 +336,15 @@ var lenny = {
                     enemytmp.spriteheight = enemyinfo[i]['spriteheight'];
                     enemytmp.actorwidth = enemyinfo[i]['width'];
                     enemytmp.actorheight = enemyinfo[i]['height'];
-                    enemytmp.xpos = getRandomArbitrary(0,canvas_main.width); //randomly position x
-                    enemytmp.ypos = getRandomArbitrary(enemyinfo[i]['vertposmin'],enemyinfo[i]['vertposmax']);
+                    if(!enemyinfo[i]['xpos'] && !enemyinfo[i]['ypos']){
+                        enemytmp.xpos = getRandomArbitrary(0,canvas_main.width); //randomly position x
+                        enemytmp.ypos = getRandomArbitrary(enemyinfo[i]['vertposmin'],enemyinfo[i]['vertposmax']);
+                    }
+                    else {
+                        enemytmp.xpos = enemyinfo[i]['xpos']
+                        enemytmp.ypos = enemyinfo[i]['ypos']
+                    }
+                    enemytmp.etype = enemyinfo[i]['type'];
                     enemytmp.range = getRandomArbitrary(50,canvas_main.width / 4); //distance the enemy will move
                     enemytmp.direction = getRandomArbitrary(0,1);
                     enemytmp.startpos = enemytmp.xpos;
@@ -351,16 +385,30 @@ var lenny = {
                         objects.splice(i, 1);
                 }
                 for(i = 0; i < enemies.length; i++){ //draw enemies
-                    enemies[i].runActions();
-                    enemies[i].move();
                     if(enemies[i].checkCollision(player))
                         enemies.splice(i, 1);
+                    enemies[i].runActions();
+                    enemies[i].move();
                 }
                 player.runActions(); //draw player
-                gameloop = setTimeout(lenny.game.gameLoop,10); //repeat
+
+                if(victory){
+                    lenny.general.endGame();
+                }
+                if(!gamepause){
+                    gameloop = setTimeout(lenny.game.gameLoop,15); //repeat
+                }
+                else {
+                    clearTimeout(gameloop);
+                }
             }
             else {
-                canvas_main_cxt.fillText("GAME OVER", canvas_main.width / 2, canvas_main.height - 60);
+                if(victory){
+                    canvas_main_cxt.fillText("CONGRATULATIONS", canvas_main.width / 2, canvas_main.height - 60);
+                }
+                else {
+                    canvas_main_cxt.fillText("GAME OVER", canvas_main.width / 2, canvas_main.height - 60);
+                }
                 canvas_main_cxt.fillText("Score: " + player.score, canvas_main.width / 2, canvas_main.height - 30);
                 canvas_main_cxt.font = "14px Arial";
                 canvas_main_cxt.fillText("Click to play again", canvas_main.width / 2, canvas_main.height - 10);
@@ -403,6 +451,7 @@ window.onload = function(){
     function resetAndResize(){
         game = 0;
         level = 1;
+        victory = 0;
         clearTimeout(gameloop);
         lenny.general.initCanvasSize();
         lenny.general.initGame();
