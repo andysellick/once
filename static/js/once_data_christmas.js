@@ -1,5 +1,5 @@
 
-var skinpath = '';
+var skinpath = 'skins/christmas/';
 
 //load images
 var allimages = ['player.png','explosion.png','player_expired.png','levelup.png'];

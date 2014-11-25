@@ -10,10 +10,39 @@ var victory = 0;
 var player;
 var enemies = [];
 var objects = [];
+var messages = [];
 
 // Returns a random number between min (inclusive) and max (exclusive)
 function getRandomArbitrary(min, max) {
   return Math.random() * (max - min) + min;
+}
+
+function messageObj(){
+    this.sprite = allimages[3];
+    this.spritex = 0;
+    this.spritey = 0;
+    this.spritewidth = 20;
+    this.spriteheight = 20;
+    this.actorwidth = canvas_main.width / 30; //30
+    this.actorheight = canvas_main.width / 30; //30
+    this.xpos;
+    this.ypos;
+    this.lifespan = 40;
+
+    //check to see if this message is due to disappear
+    this.checkLifeSpan = function(){
+        if(this.lifespan > 0){
+            this.lifespan--;
+            return(0);
+        }
+        else {
+            return(1);
+        }
+    }
+    this.drawMessage = function(){
+        //console.log(this.sprite);
+        lenny.general.drawOnCanvas(this,canvas_main_cxt);
+    }
 }
 
 //general object for main character
@@ -64,15 +93,21 @@ function characterobj(){
     this.launch = function(){
         this.active = 1;
     };
+    //if the player has levelled up
     this.levelUp = function(levelup){
-        if(this.xp > 2 || levelup){ //if the player has levelled up
+        if(this.xp > 2 || levelup){
             this.level += 1;
             this.xp = 0;
+            //FIXME now create a new message and append it to the message stack
+            message = new messageObj();
+            message.xpos = this.xpos;
+            message.ypos = this.ypos - message.actorheight;
+            messages.push(message);
         }
-        console.log("xp: %d, score: %d, level: %d.",player.xp,player.score,player.level);
+        //console.log("xp: %d, score: %d, level: %d.",player.xp,player.score,player.level);
     };
     this.expire = function(){
-        //would be nice to change the player image here
+        //change the player image to represent defeat
         this.sprite = allimages[2];
         return(0);
     };
@@ -135,7 +170,13 @@ function enemyobj(){
                     //perform death of this enemy
                     this.spritewidth = 20; //reset this in case the enemy uses a larger sprite than the 'explosion' sprite
                     this.spriteheight = 20;
-                    this.sprite = allimages[1];
+                    //switch to expired image for enemy, or use default
+                    if(this.expiredimage){
+                        this.sprite = this.expiredimage;
+                    }
+                    else {
+                        this.sprite = allimages[1];
+                    }
                     if(this.etype == 'boss'){
                         victory = 1;
                     }
@@ -391,6 +432,14 @@ var lenny = {
                     enemies[i].move();
                 }
                 player.runActions(); //draw player
+                for(i = 0; i < messages.length; i++){ //draw messages
+                    if(messages[i].checkLifeSpan()){
+                        messages.splice(i,1);
+                    }
+                    else {
+                        messages[i].drawMessage();
+                    }
+                }
 
                 if(victory){
                     lenny.general.endGame();
