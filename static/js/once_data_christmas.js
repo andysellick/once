@@ -6,11 +6,13 @@ var allimages = ['player.png','explosion.png','player_expired.png','levelup.png'
 var enemyimages = ['enemy1.png','enemy2.png','enemy3.png','enemy4.png','enemy5.png','enemy6.png','enemy7.png'];
 var objectimages = ['object1.png','object2.png','object3.png'];
 var levelimages = ['level1.png','level2.png','level3.png','level4.png']
+var expiredimages = ['enemy1_end.png','enemy2_end.png']
 
 allimages = preloadImages(allimages);
 enemyimages = preloadImages(enemyimages);
 objectimages = preloadImages(objectimages);
 levelimages = preloadImages(levelimages);
+expiredimages = preloadImages(expiredimages);
 
 //preload images
 function preloadImages(array){
@@ -35,8 +37,9 @@ function enemydata(canvas_main){
     //vertposmax = closest this can be positioned to the bottom
     var enemydata = [
         {
-            'type': 'ghost',
+            'type': '',
             'img': enemyimages[0],
+            'expired':expiredimages[0],
             'speed': 0.4,
             'level': 1,
             'xp': 1,
@@ -49,8 +52,9 @@ function enemydata(canvas_main){
             'levelcount': [24,0,0]
         },
         {
-            'type': 'blob',
+            'type': '',
             'img': enemyimages[1],
+            'expired':expiredimages[1],
             'speed': 0.5,
             'level': 2,
             'xp': 1,

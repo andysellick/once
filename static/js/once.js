@@ -21,10 +21,10 @@ function messageObj(){
     this.sprite = allimages[3];
     this.spritex = 0;
     this.spritey = 0;
-    this.spritewidth = 20;
-    this.spriteheight = 20;
-    this.actorwidth = canvas_main.width / 30; //30
-    this.actorheight = canvas_main.width / 30; //30
+    this.spritewidth = 30;
+    this.spriteheight = 30;
+    this.actorwidth = canvas_main.width / 20; //30
+    this.actorheight = canvas_main.width / 20; //30
     this.xpos;
     this.ypos;
     this.lifespan = 40;
@@ -116,6 +116,7 @@ function characterobj(){
 //general object for enemy
 function enemyobj(){
     this.sprite;
+    this.expiredimage;
     this.spritex = 0;
     this.spritey = 0;
     this.spritewidth = 0;
@@ -373,6 +374,7 @@ var lenny = {
 
                     enemytmp = new enemyobj();
                     enemytmp.sprite = enemyinfo[i]['img'];
+                    enemytmp.expiredimage = enemyinfo[i]['expired'];
                     enemytmp.spritewidth = enemyinfo[i]['spritewidth'];
                     enemytmp.spriteheight = enemyinfo[i]['spriteheight'];
                     enemytmp.actorwidth = enemyinfo[i]['width'];
