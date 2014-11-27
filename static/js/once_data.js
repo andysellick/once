@@ -6,11 +6,13 @@ var allimages = ['player.png','explosion.png','player_expired.png','levelup.png'
 var enemyimages = ['enemy1.png','enemy2.png','enemy3.png','enemy4.png','enemy5.png','enemy6.png','enemy7.png'];
 var objectimages = ['object1.png','object2.png','object3.png'];
 var levelimages = ['level1.png','level2.png','level3.png','level4.png']
+var expiredimages = ['explosion.png']
 
 allimages = preloadImages(allimages);
 enemyimages = preloadImages(enemyimages);
 objectimages = preloadImages(objectimages);
 levelimages = preloadImages(levelimages);
+expiredimages = preloadImages(expiredimages);
 
 //preload images
 function preloadImages(array){

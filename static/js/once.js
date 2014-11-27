@@ -176,7 +176,7 @@ function enemyobj(){
                         this.sprite = this.expiredimage;
                     }
                     else {
-                        this.sprite = allimages[1];
+                        this.sprite = expiredimages[0];
                     }
                     if(this.etype == 'boss'){
                         victory = 1;
