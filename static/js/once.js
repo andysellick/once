@@ -420,7 +420,7 @@ var lenny = {
     game: {
         gameLoop: function(){ //put code in here that needs to run for the game to work
             if(game){
-                lenny.general.clearCanvas(canvas_main,canvas_main_cxt); //clear canvas
+                //lenny.general.clearCanvas(canvas_main,canvas_main_cxt); //clear canvas, seems to be causing massive horrible flickering in firefox
                 canvas_main_cxt.drawImage(levelimages[level - 1],0,0,levelimages[0].width,levelimages[0].height,0,0,canvas_main.width,canvas_main.height); //draw level
                 for(i = 0; i < objects.length; i++){ //draw objects
                     objects[i].runActions();
