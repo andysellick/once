@@ -30,7 +30,10 @@ function preloadImages(array){
 function enemydata(canvas_main){
     var enemywidth = canvas_main.width / 20; //30;
     var enemyheight = canvas_main.width / 20; //30;
+    var vertspeed = canvas_main.height / 267;
+    var horzspeed = canvas_main.width / 200;
     var spritewidth = 20;
+    var spriteheight = 20;
     
     //all calculations are done on the assumption that the general dimensions are 600x800
     //vertposmin = closest this can be positioned to the top
@@ -39,8 +42,10 @@ function enemydata(canvas_main){
         {
             'type': '',
             'img': enemyimages[0],
-            'expired':expiredimages[0],
-            'speed': 0.4,
+            'imgleft':[0,0],
+            'imgright':[20,0],
+            'imgdone':[40,0],
+            'speed': (horzspeed / 10) * 2,
             'level': 1,
             'xp': 1,
             'vertposmin': canvas_main.height / 4,
@@ -48,13 +53,15 @@ function enemydata(canvas_main){
             'width': enemywidth,
             'height': enemyheight,
             'spritewidth': spritewidth,
-            'spriteheight': 20,
-            'levelcount': [24,0,0]
+            'spriteheight': spriteheight,
+            'levelcount': [30,0,0]
         },
         {
             'type': '',
             'img': enemyimages[1],
-            'expired':expiredimages[1],
+            'imgleft':[0,0],
+            'imgright':[20,0],
+            'imgdone':[40,0],
             'speed': 0.5,
             'level': 2,
             'xp': 1,
@@ -67,8 +74,11 @@ function enemydata(canvas_main){
             'levelcount': [15,0,0]
         },
         {
-            'type': 'wolf',
+            'type': '',
             'img': enemyimages[2],
+            'imgleft':[0,0],
+            'imgright':[20,0],
+            'imgdone':[40,0],
             'speed': 0.6,
             'level': 3,
             'xp': 1,
@@ -80,6 +90,7 @@ function enemydata(canvas_main){
             'spriteheight': 20,
             'levelcount': [12,12,4]
         },
+        /*
         {
             'type': 'bear',
             'img': enemyimages[3],
@@ -138,6 +149,7 @@ function enemydata(canvas_main){
             'spriteheight': 70,
             'levelcount': [0,0,0,1]
         }
+        */
     ];
     return(enemydata);
 }

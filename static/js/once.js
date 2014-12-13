@@ -19,8 +19,7 @@ function getRandomArbitrary(min, max) {
 
 function messageObj(){
     this.sprite = allimages[3];
-    this.spritex = 0;
-    this.spritey = 0;
+    this.spritexy = [0,0];
     this.spritewidth = 30;
     this.spriteheight = 30;
     this.actorwidth = canvas_main.width / 20; //30
@@ -48,15 +47,14 @@ function messageObj(){
 //general object for main character
 function characterobj(){
     this.sprite;
-    this.spritex = 0;
-    this.spritey = 0;
+    this.spritexy = [0,0];
     this.spritewidth = 20;
     this.spriteheight = 20;
     this.actorwidth;
     this.actorheight;
     this.xpos;
     this.ypos;
-    this.speed = 1; //speed the character moves up the screen
+    this.speed = canvas_main.height / 600; //speed the character moves up the screen
     this.points = 0;
     this.level = 1;
     this.xp = 0;
@@ -116,11 +114,14 @@ function characterobj(){
 //general object for enemy
 function enemyobj(){
     this.sprite;
-    this.expiredimage;
-    this.spritex = 0;
-    this.spritey = 0;
+    //store the position in the image to draw, changes if enemy is moving left or right, or dies
+    this.spritexy = [0,0];
     this.spritewidth = 0;
     this.spriteheight = 0;
+    this.spriteleftpos;
+    this.spriterightpos;
+    this.spriteendpos;
+
     this.actorwidth;
     this.actorheight;
     this.xpos;
@@ -140,17 +141,23 @@ function enemyobj(){
     //move character left or right
     this.move = function(){
         if(this.moveby){
-            if(this.direction){
+            if(this.direction){ //move left
                 if(this.xpos > (this.startpos - (this.range / 2)))
                     this.xpos -= this.moveby;
-                else
+                else {
                     this.direction = 0;
+                    this.spritexy = this.spriterightpos;
+                    console.log('turn right');
+                }
             }
             else {
                 if(this.xpos < (this.startpos + (this.range / 2)))
                     this.xpos += this.moveby;
-                else
+                else {
                     this.direction = 1;
+                    this.spritexy = this.spriteleftpos;
+                    console.log('turn left');
+                }
             }
         }
     };
@@ -172,12 +179,8 @@ function enemyobj(){
                     this.spritewidth = 20; //reset this in case the enemy uses a larger sprite than the 'explosion' sprite
                     this.spriteheight = 20;
                     //switch to expired image for enemy, or use default
-                    if(this.expiredimage){
-                        this.sprite = this.expiredimage;
-                    }
-                    else {
-                        this.sprite = expiredimages[0];
-                    }
+                    this.spritexy = this.spriteendpos;
+
                     if(this.etype == 'boss'){
                         victory = 1;
                     }
@@ -199,8 +202,7 @@ function enemyobj(){
 //general object for object
 function objectobj(){
     this.sprite;
-    this.spritex = 0;
-    this.spritey = 0;
+    this.spritexy = [0,0];
     this.spritewidth = 20;
     this.spriteheight = 20;
     this.actorwidth;
@@ -339,7 +341,7 @@ var lenny = {
         },
         //draw some object on the canvas
         drawOnCanvas: function(object, cxt){
-            cxt.drawImage(object.sprite, object.spritex, object.spritey, object.spritewidth, object.spriteheight, object.xpos, object.ypos, object.actorwidth, object.actorheight);
+            cxt.drawImage(object.sprite, object.spritexy[0], object.spritexy[1], object.spritewidth, object.spriteheight, object.xpos, object.ypos, object.actorwidth, object.actorheight);
         },
         //completely clear the canvas
         clearCanvas: function(canvas, cxt){
@@ -374,11 +376,16 @@ var lenny = {
 
                     enemytmp = new enemyobj();
                     enemytmp.sprite = enemyinfo[i]['img'];
-                    enemytmp.expiredimage = enemyinfo[i]['expired'];
+
+                    enemytmp.spriteleftpos = enemyinfo[i]['imgleft'];
+                    enemytmp.spriterightpos = enemyinfo[i]['imgright'];
+                    enemytmp.spriteendpos = enemyinfo[i]['imgdone'];
+
                     enemytmp.spritewidth = enemyinfo[i]['spritewidth'];
                     enemytmp.spriteheight = enemyinfo[i]['spriteheight'];
                     enemytmp.actorwidth = enemyinfo[i]['width'];
                     enemytmp.actorheight = enemyinfo[i]['height'];
+
                     if(!enemyinfo[i]['xpos'] && !enemyinfo[i]['ypos']){
                         enemytmp.xpos = getRandomArbitrary(0,canvas_main.width); //randomly position x
                         enemytmp.ypos = getRandomArbitrary(enemyinfo[i]['vertposmin'],enemyinfo[i]['vertposmax']);
@@ -428,8 +435,7 @@ var lenny = {
                         objects.splice(i, 1);
                 }
                 for(i = 0; i < enemies.length; i++){ //draw enemies
-                    if(enemies[i].checkCollision(player))
-                        enemies.splice(i, 1);
+                    enemies[i].checkCollision(player);
                     enemies[i].runActions();
                     enemies[i].move();
                 }
