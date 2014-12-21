@@ -37,8 +37,8 @@ function loadFile(src,array,num,obtype) {
         var sound = new Howl({
             urls: [src],
             onload: function(){
-                console.log('preloaded',src);
-                console.log(allSounds);
+                //console.log('preloaded',src);
+                //console.log(allSounds);
                 array[num] = sound;
                 deferred.resolve();
             }

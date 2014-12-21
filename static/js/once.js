@@ -6,7 +6,6 @@ var gamepause = 0;
 var gameloop;
 var level = 1;
 var victory = 0;
-var mainsoundok = 1;
 
 var player;
 var enemies = [];
@@ -426,18 +425,9 @@ var lenny = {
                 
                 if(allSounds.length){
                     //console.log(allSounds);
-                    console.log('playing', allSounds[6],allSounds[6].pos());
                     if(allSounds[6].pos() == 0){
                         allSounds[6].play();
                     }
-                    /*
-                    if(mainsoundok){
-                        mainsoundok = 0;
-                        allSounds[6].play().onend(function(){
-                            mainsoundok = 1;
-                        });
-                    }
-                    */
                 }
 
                 canvas_main_cxt.drawImage(levelimages[level - 1],0,0,levelimages[0].width,levelimages[0].height,0,0,canvas_main.width,canvas_main.height); //draw level
