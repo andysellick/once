@@ -20,9 +20,9 @@ function getRandomArbitrary(min, max) {
 function messageObj(){
     this.sprite = allimages[3];
     this.spritexy = [0,0];
-    this.spritewidth = 30;
+    this.spritewidth = 40;
     this.spriteheight = 30;
-    this.actorwidth = canvas_main.width / 20; //30
+    this.actorwidth = canvas_main.width / 15; //40
     this.actorheight = canvas_main.width / 20; //30
     this.xpos;
     this.ypos;
@@ -73,7 +73,7 @@ function characterobj(){
                     enemies = [];
                     objects = [];
                     lenny.people.setupEnemies();
-                    if(level == 4){ //final level
+                    if(level == levelimages.length){ //final level
                         player.xpos = (canvas_main.width / 2) - (player.actorwidth / 2);
                     }
                     else {
@@ -93,7 +93,7 @@ function characterobj(){
     };
     //if the player has levelled up
     this.levelUp = function(levelup){
-        if(this.xp > 2 || levelup){
+        if(this.xp > 3 || levelup){ //FIXME would be good to control this through data
             this.level += 1;
             this.xp = 0;
             //FIXME now create a new message and append it to the message stack
@@ -144,26 +144,24 @@ function enemyobj(){
             if(this.direction){ //move left
                 if(this.xpos > (this.startpos - (this.range / 2)))
                     this.xpos -= this.moveby;
-                else {
+                else { //turn right
                     this.direction = 0;
                     this.spritexy = this.spriterightpos;
-                    console.log('turn right');
                 }
             }
             else {
                 if(this.xpos < (this.startpos + (this.range / 2)))
                     this.xpos += this.moveby;
-                else {
+                else { //turn left
                     this.direction = 1;
                     this.spritexy = this.spriteleftpos;
-                    console.log('turn left');
                 }
             }
         }
     };
     //check to see if this enemy has hit the player
     this.checkCollision = function(theplayer){
-        if(this.moveby || this.etype == 'boss'){
+        if(this.moveby || this.etype == 'boss'){ //FIXME if this isn't set right in data collision detection fails
             if(checkPlayerCollision(this,theplayer)){
                 //if we can kill this monster
                 if(theplayer.level >= this.level){
@@ -176,9 +174,6 @@ function enemyobj(){
                     //console.log("post collision - player xp: %d, score: %d, level: %d.",theplayer.xp,theplayer.score,theplayer.level);
 
                     //perform death of this enemy
-                    this.spritewidth = 20; //reset this in case the enemy uses a larger sprite than the 'explosion' sprite
-                    this.spriteheight = 20;
-                    //switch to expired image for enemy, or use default
                     this.spritexy = this.spriteendpos;
 
                     if(this.etype == 'boss'){

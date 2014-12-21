@@ -3,16 +3,14 @@ var skinpath = 'skins/christmas/';
 
 //load images
 var allimages = ['player.png','explosion.png','player_expired.png','levelup.png'];
-var enemyimages = ['enemy1.png','enemy2.png','enemy3.png','enemy4.png','enemy5.png','enemy6.png','enemy7.png'];
+var enemyimages = ['enemy1.png','enemy2.png','enemy3.png','enemy4.png','enemy5.png','enemy6.png','enemy7.png','enemy8.png'];
 var objectimages = ['object1.png','object2.png','object3.png'];
-var levelimages = ['level1.png','level2.png','level3.png','level4.png']
-var expiredimages = ['enemy1_end.png','enemy2_end.png']
+var levelimages = ['level1.png','level2.png','level3.png']
 
 allimages = preloadImages(allimages);
 enemyimages = preloadImages(enemyimages);
 objectimages = preloadImages(objectimages);
 levelimages = preloadImages(levelimages);
-expiredimages = preloadImages(expiredimages);
 
 //preload images
 function preloadImages(array){
@@ -40,7 +38,7 @@ function enemydata(canvas_main){
     //vertposmax = closest this can be positioned to the bottom
     var enemydata = [
         {
-            'type': '',
+            'type': 'child1',
             'img': enemyimages[0],
             'imgleft':[0,0],
             'imgright':[20,0],
@@ -54,10 +52,10 @@ function enemydata(canvas_main){
             'height': enemyheight,
             'spritewidth': spritewidth,
             'spriteheight': spriteheight,
-            'levelcount': [30,0,0]
+            'levelcount': [25,0,0]
         },
         {
-            'type': '',
+            'type': 'child2',
             'img': enemyimages[1],
             'imgleft':[0,0],
             'imgright':[20,0],
@@ -70,86 +68,114 @@ function enemydata(canvas_main){
             'width': enemywidth,
             'height': enemyheight,
             'spritewidth': spritewidth,
-            'spriteheight': 20,
+            'spriteheight': spriteheight,
             'levelcount': [15,0,0]
         },
         {
-            'type': '',
+            'type': 'man',
             'img': enemyimages[2],
             'imgleft':[0,0],
             'imgright':[20,0],
             'imgdone':[40,0],
             'speed': 0.6,
-            'level': 3,
+            'level': 4,
             'xp': 1,
-            'vertposmin': canvas_main.height / 10,
+            'vertposmin': canvas_main.height / 15,
             'vertposmax': canvas_main.height / 2,
             'width': enemywidth,
             'height': enemyheight,
             'spritewidth': spritewidth,
-            'spriteheight': 20,
-            'levelcount': [12,12,4]
+            'spriteheight': spriteheight,
+            'levelcount': [12,0,0]
         },
-        /*
         {
-            'type': 'bear',
+            'type': 'sledge',
             'img': enemyimages[3],
+            'imgleft':[0,0],
+            'imgright':[40,0],
+            'imgdone':[80,0],
             'speed': 0.3,
-            'level': 7,
+            'level': 5,
             'xp': 1,
-            'vertposmin': canvas_main.height / 10,
-            'vertposmax': canvas_main.height / 2 + canvas_main.height / 3,
+            'vertposmin': canvas_main.height / 2,
+            'vertposmax': canvas_main.height / 1.2,
             'width': enemywidth * 2,
             'height': enemyheight,
-            'spritewidth': 40,
-            'spriteheight': 20,
-            'levelcount': [0,10,5]
+            'spritewidth': spritewidth * 2,
+            'spriteheight': spriteheight,
+            'levelcount': [0,10,0]
         },
+
         {
-            'type': 'dragon',
+            'type': 'van',
             'img': enemyimages[4],
+            'imgleft':[0,0],
+            'imgright':[40,0],
+            'imgdone':[80,0],
             'speed': 0.3,
-            'level': 8,
+            'level': 6,
             'xp': 1,
-            'vertposmin': canvas_main.height / 20,
-            'vertposmax': canvas_main.height / 4,
+            'vertposmin': canvas_main.height / 1.6,
+            'vertposmax': canvas_main.height / 1.35,
             'width': enemywidth * 2,
             'height': enemyheight * 1.5,
-            'spritewidth': 40,
+            'spritewidth': spritewidth * 2,
             'spriteheight': 30,
-            'levelcount': [0,10,5]
+            'levelcount': [0,5,0]
         },
         {
-            'type': 'ogre',
+            'type': 'shoveler',
             'img': enemyimages[5],
+            'imgleft':[0,0],
+            'imgright':[20,0],
+            'imgdone':[40,0],
             'speed': 0.2,
-            'level': 10,
+            'level': 7,
             'xp': 1,
-            'vertposmin': canvas_main.height / 20,
-            'vertposmax': canvas_main.height / 3,
-            'width': enemywidth * 2.5,
-            'height': enemyheight * 2.5,
-            'spritewidth': 50,
-            'spriteheight': 50,
-            'levelcount': [0,0,3]
+            'vertposmin': canvas_main.height / 3,
+            'vertposmax': canvas_main.height / 1.7,
+            'width': enemywidth,
+            'height': enemyheight,
+            'spritewidth': spritewidth,
+            'spriteheight': spriteheight,
+            'levelcount': [0,8,0]
+        },
+        {
+            'type': 'carolers',
+            'img': enemyimages[6],
+            'imgleft':[0,0],
+            'imgright':[30,0],
+            'imgdone':[60,0],
+            'speed': 0.1,
+            'level': 9,
+            'xp': 1,
+            'vertposmin': canvas_main.height / 10,
+            'vertposmax': canvas_main.height / 2.5,
+            'width': enemywidth * 1.5,
+            'height': enemyheight,
+            'spritewidth': 30,
+            'spriteheight': spriteheight,
+            'levelcount': [0,10,0]
         },
         {
             'type': 'boss',
-            'img': enemyimages[6],
+            'img': enemyimages[7],
+            'imgleft':[0,0],
+            'imgright':[0,0],
+            'imgdone':[40,0],
             'speed': 0,
-            'level': 14,
-            'xp': 20,
+            'level': 11,
+            'xp': 0,
             'xpos': (canvas_main.width / 2) - (enemywidth * 5) / 2,
-            'ypos': canvas_main.height / 4,
-            'vertposmin': canvas_main.height / 20,
-            'vertposmax': canvas_main.height / 3,
-            'width': enemywidth * 5,
-            'height': enemyheight * 3.5,
-            'spritewidth': 100,
-            'spriteheight': 70,
-            'levelcount': [0,0,0,1]
+            'ypos': canvas_main.height / 3.4,
+            'vertposmin': canvas_main.height / 10,
+            'vertposmax': canvas_main.height / 2,
+            'width': enemywidth * 2.5,
+            'height': enemyheight * 3,
+            'spritewidth': 40,
+            'spriteheight': 45,
+            'levelcount': [0,0,1]
         }
-        */
     ];
     return(enemydata);
 }
