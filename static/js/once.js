@@ -6,6 +6,7 @@ var gamepause = 0;
 var gameloop;
 var level = 1;
 var victory = 0;
+var mainsoundok = 1;
 
 var player;
 var enemies = [];
@@ -54,7 +55,7 @@ function characterobj(){
     this.actorheight;
     this.xpos;
     this.ypos;
-    this.speed = canvas_main.height / 600; //speed the character moves up the screen
+    this.speed = canvas_main.height / 500; //speed the character moves up the screen
     this.points = 0;
     this.level = 1;
     this.xp = 0;
@@ -167,10 +168,12 @@ function enemyobj(){
                 if(theplayer.level >= this.level){
                     //console.log("Pre collision - player xp: %d, score: %d, level: %d. Enemy xp: %d, level: %d",theplayer.xp,theplayer.score,theplayer.level,this.xp,this.level);
                     theplayer.xp += this.xp;
-                    theplayer.score += this.xp;
+                    theplayer.score += this.level;
                     theplayer.ypos += 10;
                     this.moveby = 0;
                     theplayer.levelUp(0);
+                    var randsigh = Math.floor(Math.random() * 3) + 1
+                    allSounds[randsigh].play();
                     //console.log("post collision - player xp: %d, score: %d, level: %d.",theplayer.xp,theplayer.score,theplayer.level);
 
                     //perform death of this enemy
@@ -219,11 +222,14 @@ function objectobj(){
             case 0: //teleport
                 theplayer.ypos = Math.min(theplayer.ypos + canvas_main.height / 10, canvas_main.height - theplayer.actorheight);
                 theplayer.xpos = getRandomArbitrary(canvas_main.width / 10, canvas_main.width - canvas_main.width / 10);
+                allSounds[4].play();
                 break;
             case 1: //sword, nothing yet
+                allSounds[5].play();
                 break;
             case 2: //increase party size
                 //player width is width of canvas / 20, maximum width is 3x, i.e. 3 party companions
+                allSounds[0].play();
                 theplayer.partysize += 1;
                 theplayer.actorwidth = Math.min(theplayer.actorwidth + (canvas_main.width / 20), (canvas_main.width / 20) * 3);
                 theplayer.spritewidth = Math.min(theplayer.spritewidth + 20, 60); //these numbers are hard coded to reflect the actual size of the sprite, i.e. 60x20
@@ -327,12 +333,6 @@ var lenny = {
             canvas_main_cxt.textAlign = "center";
             game = 0;
             player.score = player.score * level;
-            /*
-            canvas_main_cxt.shadowColor = "#a98c8c";
-            canvas_main_cxt.shadowOffsetX = 2;
-            canvas_main_cxt.shadowOffsetY = 2;
-            canvas_main_cxt.shadowBlur = 0;
-            */
         },
         //draw some object on the canvas
         drawOnCanvas: function(object, cxt){
@@ -423,6 +423,23 @@ var lenny = {
         gameLoop: function(){ //put code in here that needs to run for the game to work
             if(game){
                 //lenny.general.clearCanvas(canvas_main,canvas_main_cxt); //clear canvas, seems to be causing massive horrible flickering in firefox
+                
+                if(allSounds.length){
+                    //console.log(allSounds);
+                    console.log('playing', allSounds[6],allSounds[6].pos());
+                    if(allSounds[6].pos() == 0){
+                        allSounds[6].play();
+                    }
+                    /*
+                    if(mainsoundok){
+                        mainsoundok = 0;
+                        allSounds[6].play().onend(function(){
+                            mainsoundok = 1;
+                        });
+                    }
+                    */
+                }
+
                 canvas_main_cxt.drawImage(levelimages[level - 1],0,0,levelimages[0].width,levelimages[0].height,0,0,canvas_main.width,canvas_main.height); //draw level
                 for(i = 0; i < objects.length; i++){ //draw objects
                     objects[i].runActions();
@@ -460,6 +477,7 @@ var lenny = {
                 }
                 else {
                     canvas_main_cxt.fillText("GAME OVER", canvas_main.width / 2, canvas_main.height - 60);
+                    allSounds[3].play();
                 }
                 canvas_main_cxt.fillText("Score: " + player.score, canvas_main.width / 2, canvas_main.height - 30);
                 canvas_main_cxt.font = "14px Arial";
@@ -473,7 +491,10 @@ window.lenny = lenny;
 
 //do stuff
 window.onload = function(){
-    lenny.general.initialise();
+    
+    $.when.apply(null, loaders).done(function() {
+        lenny.general.initialise();
+    });
 
     $(window).on('resize',function(){
         resetAndResize();

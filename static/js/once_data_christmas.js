@@ -1,27 +1,50 @@
 
 var skinpath = 'skins/christmas/';
+var soundpath = skinpath + 'sound/';
 
-//load images
 var allimages = ['player.png','explosion.png','player_expired.png','levelup.png'];
 var enemyimages = ['enemy1.png','enemy2.png','enemy3.png','enemy4.png','enemy5.png','enemy6.png','enemy7.png','enemy8.png'];
 var objectimages = ['object1.png','object2.png','object3.png'];
 var levelimages = ['level1.png','level2.png','level3.png']
 
-allimages = preloadImages(allimages);
-enemyimages = preloadImages(enemyimages);
-objectimages = preloadImages(objectimages);
-levelimages = preloadImages(levelimages);
+var allSounds = ['moose.ogg','sigh1.ogg','sigh2.ogg','sigh3.ogg','mediacollege-beep-02.wav','mediacollege-beep-06.wav','soundbible-bells-quiet.ogg'];
 
-//preload images
-function preloadImages(array){
-    var imagedir = 'static/img/' + skinpath;
-    var tempimg;
-    for(i in array){
-        tempimg = new Image();
-        tempimg.src = imagedir + array[i];
-        array[i] = tempimg;
+var loaders = [];
+callAllPreloads(allimages,skinpath,'img');
+callAllPreloads(enemyimages,skinpath,'img');
+callAllPreloads(objectimages,skinpath,'img');
+callAllPreloads(levelimages,skinpath,'img');
+callAllPreloads(allSounds,soundpath,'sfx');
+
+function callAllPreloads(array,dir,obtype){
+    for(var z = 0; z < array.length; z++){
+        loaders.push(loadFile('static/img/' + dir + array[z], array, z, obtype));
     }
-    return(array);
+}
+
+//preload images and sounds
+function loadFile(src,array,num,obtype) {
+    var deferred = $.Deferred();
+    if(obtype == 'img'){
+        var sprite = new Image();
+        sprite.onload = function() {
+            array[num] = sprite;
+            deferred.resolve();
+        };
+        sprite.src = src;
+    }
+    else if(obtype == 'sfx'){
+        var sound = new Howl({
+            urls: [src],
+            onload: function(){
+                console.log('preloaded',src);
+                console.log(allSounds);
+                array[num] = sound;
+                deferred.resolve();
+            }
+        });
+    }
+    return deferred.promise();
 }
 
 //function to return all the enemy information
@@ -103,7 +126,7 @@ function enemydata(canvas_main){
             'height': enemyheight,
             'spritewidth': spritewidth * 2,
             'spriteheight': spriteheight,
-            'levelcount': [0,10,0]
+            'levelcount': [0,12,0]
         },
 
         {
@@ -121,7 +144,7 @@ function enemydata(canvas_main){
             'height': enemyheight * 1.5,
             'spritewidth': spritewidth * 2,
             'spriteheight': 30,
-            'levelcount': [0,5,0]
+            'levelcount': [0,4,0]
         },
         {
             'type': 'shoveler',
@@ -147,7 +170,7 @@ function enemydata(canvas_main){
             'imgright':[30,0],
             'imgdone':[60,0],
             'speed': 0.1,
-            'level': 9,
+            'level': 8,
             'xp': 1,
             'vertposmin': canvas_main.height / 10,
             'vertposmax': canvas_main.height / 2.5,
