@@ -18,7 +18,7 @@ function getRandomArbitrary(min, max) {
 }
 
 function messageObj(){
-    this.sprite = allimages[3];
+    this.sprite = allimages[2];
     this.spritexy = [0,0];
     this.spritewidth = 40;
     this.spriteheight = 30;
@@ -106,7 +106,7 @@ function characterobj(){
     };
     this.expire = function(){
         //change the player image to represent defeat
-        this.sprite = allimages[2];
+        this.sprite = allimages[1];
         return(0);
     };
 }
@@ -172,7 +172,8 @@ function enemyobj(){
                     this.moveby = 0;
                     theplayer.levelUp(0);
                     var randsigh = Math.floor(Math.random() * 3) + 1
-                    allSounds[randsigh].play();
+                    if(hasaudio)
+                        allSounds[randsigh].play();
                     //console.log("post collision - player xp: %d, score: %d, level: %d.",theplayer.xp,theplayer.score,theplayer.level);
 
                     //perform death of this enemy
@@ -221,14 +222,17 @@ function objectobj(){
             case 0: //teleport
                 theplayer.ypos = Math.min(theplayer.ypos + canvas_main.height / 10, canvas_main.height - theplayer.actorheight);
                 theplayer.xpos = getRandomArbitrary(canvas_main.width / 10, canvas_main.width - canvas_main.width / 10);
-                allSounds[4].play();
+                if(hasaudio)
+                    allSounds[4].play();
                 break;
             case 1: //sword, nothing yet
-                allSounds[5].play();
+                if(hasaudio)
+                    allSounds[5].play();
                 break;
             case 2: //increase party size
                 //player width is width of canvas / 20, maximum width is 3x, i.e. 3 party companions
-                allSounds[0].play();
+                if(hasaudio)
+                    allSounds[0].play();
                 theplayer.partysize += 1;
                 theplayer.actorwidth = Math.min(theplayer.actorwidth + (canvas_main.width / 20), (canvas_main.width / 20) * 3);
                 theplayer.spritewidth = Math.min(theplayer.spritewidth + 20, 60); //these numbers are hard coded to reflect the actual size of the sprite, i.e. 60x20
@@ -343,6 +347,14 @@ var lenny = {
             var w = canvas.width;
             canvas.width = 1;
             canvas.width = w;
+        },
+        //sort array of objects - http://stackoverflow.com/questions/1129216/sorting-objects-in-an-array-by-a-field-value-in-javascript
+        sortObjs: function(a,b){
+            if (a.ypos < b.ypos)
+                return -1;
+            if (a.ypos > b.ypos)
+                return 1;
+            return 0;
         }
     },
     people: {
@@ -398,6 +410,7 @@ var lenny = {
                     enemies.push(enemytmp);
                 }
             }
+            enemies.sort(lenny.general.sortObjs); //sort enemies by vertical position
         },
         //initialise data for power ups
         setupObjects: function(){
@@ -422,11 +435,13 @@ var lenny = {
         gameLoop: function(){ //put code in here that needs to run for the game to work
             if(game){
                 //lenny.general.clearCanvas(canvas_main,canvas_main_cxt); //clear canvas, seems to be causing massive horrible flickering in firefox
-                
-                if(allSounds.length){
-                    //console.log(allSounds);
-                    if(allSounds[6].pos() == 0){
-                        allSounds[6].play();
+                if(hasaudio){
+                    if(allSounds.length){
+                        //console.log(allSounds);
+                        //console.log(allSounds[6].pos());
+                        if(allSounds[6].pos() == 0){
+                            allSounds[6].play();
+                        }
                     }
                 }
 
@@ -455,7 +470,7 @@ var lenny = {
                     lenny.general.endGame();
                 }
                 if(!gamepause){
-                    gameloop = setTimeout(lenny.game.gameLoop,15); //repeat
+                    gameloop = setTimeout(lenny.game.gameLoop,20); //repeat
                 }
                 else {
                     clearTimeout(gameloop);
@@ -467,7 +482,8 @@ var lenny = {
                 }
                 else {
                     canvas_main_cxt.fillText("GAME OVER", canvas_main.width / 2, canvas_main.height - 60);
-                    allSounds[3].play();
+                    if(hasaudio)
+                        allSounds[3].play();
                 }
                 canvas_main_cxt.fillText("Score: " + player.score, canvas_main.width / 2, canvas_main.height - 30);
                 canvas_main_cxt.font = "14px Arial";
@@ -481,7 +497,7 @@ window.lenny = lenny;
 
 //do stuff
 window.onload = function(){
-    
+  
     $.when.apply(null, loaders).done(function() {
         lenny.general.initialise();
     });

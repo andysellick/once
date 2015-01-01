@@ -1,10 +1,14 @@
+/* checking to see if audio is possible */
+var hasaudio = 1;
+if(document.getElementById('page').classList.contains('no-audio'))
+    hasaudio = 0;
 
 var skinpath = 'skins/christmas/';
 var soundpath = skinpath + 'sound/';
 
-var allimages = ['player.png','explosion.png','player_expired.png','levelup.png'];
-var enemyimages = ['enemy1.png','enemy2.png','enemy3.png','enemy4.png','enemy5.png','enemy6.png','enemy7.png','enemy8.png'];
-var objectimages = ['object1.png','object2.png','object3.png'];
+var allimages = ['player.gif','player_expired.gif','levelup.gif'];
+var enemyimages = ['enemy1.gif','enemy2.gif','enemy3.gif','enemy4.gif','enemy5.gif','enemy6.gif','enemy7.gif','enemy8.gif'];
+var objectimages = ['object1.gif','object2.gif','object3.gif'];
 var levelimages = ['level1.png','level2.png','level3.png']
 
 var allSounds = ['moose.ogg','sigh1.ogg','sigh2.ogg','sigh3.ogg','mediacollege-beep-02.wav','mediacollege-beep-06.wav','soundbible-bells-quiet.ogg'];
@@ -14,7 +18,8 @@ callAllPreloads(allimages,skinpath,'img');
 callAllPreloads(enemyimages,skinpath,'img');
 callAllPreloads(objectimages,skinpath,'img');
 callAllPreloads(levelimages,skinpath,'img');
-callAllPreloads(allSounds,soundpath,'sfx');
+if(hasaudio)
+    callAllPreloads(allSounds,soundpath,'sfx');
 
 function callAllPreloads(array,dir,obtype){
     for(var z = 0; z < array.length; z++){
